@@ -7,5 +7,9 @@ jobs:
     steps:
       -name: Checkout the repository
        uses: actions/checkout@v3
+<<<<<<< HEAD
        -run: TOOLS_PATH=/home/ubuntu/dev/tools make
+=======
+       -run: make
+>>>>>>> 01b450259674c4600239e94985d53f5290f2d9f8
        -run: make cppcheck
