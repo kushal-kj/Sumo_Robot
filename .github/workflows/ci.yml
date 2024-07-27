@@ -8,8 +8,12 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
-      - name: Set TOOLS_PATH and run make
-        run: TOOLS_PATH=/home/ubuntu/dev/tools make
+      - name: Checks the formatting
+        run: make format && git diff --quiet
 
       - name: Run cppcheck
         run: make cppcheck
+
+      - name: Set TOOLS_PATH and run make
+        run: TOOLS_PATH=/home/ubuntu/dev/tools make
+
