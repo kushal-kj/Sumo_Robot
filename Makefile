@@ -10,7 +10,7 @@ TI_CCS_DIR = $(TOOLS_DIR)/ccs1271/ccs
 DEBUG_BIN_DIR = $(TI_CCS_DIR)/ccs_base/DebugServer/bin
 DEBUG_DRIVERS_DIR = $(TI_CCS_DIR)/ccs_base/DebugServer/drivers
 
-LIB_DIRS = $(MSPGCC_INCLUDE_DIR
+LIB_DIRS = $(MSPGCC_INCLUDE_DIR)
 INCLUDE_DIRS = $(MSPGCC_INCLUDE_DIR) \
 	       ./src \
 	       ./external/ \
@@ -23,12 +23,25 @@ CC = $(MSPGCC_BIN_DIR)/msp430-elf-gcc
 RM=rm
 DEBUG = LD_LIBRARY_PATH=$(DEBUG_DRIVERS_DIR) $(DEBUG_BIN_DIR)/mspdebug
 CPPCHECK = cppcheck
+FORMAT = clang-format-12
 
 #Files
 TARGET = $(BIN_DIR)/sumo_robot
 
-SOURCES = main.c \
+SOURCES_WITH_HEADERS = \
+		       src/drivers/uart.c \
+		       src/drivers/i2c.c \
+		       src/app/drive.c \
+		       src/app/enemy.c \
+
+SOURCES = \
+	  src/main.c \
+	  $(SOURCES_WITH_HEADERS)
 	  
+HEADERS = \
+	  $(SOURCES_WITH_HEADERS:.c=.h) \
+	  src/common/defines.h \
+
 OBJECT_NAMES = $(SOURCES:.c=.o)			#naming the .o files same as .c files
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(OBJECT_NAMES))		#automatically creating .o files
 
@@ -42,7 +55,7 @@ LDFLAGS = -mmcu=$(MCU) $(addprefix -L,$(LIB_DIRS))			#Linker flags
 
 #Build
 ##Linking
-$(TARGET): $(OBJECTS)
+$(TARGET): $(OBJECTS) $(HEADERS)
 	@mkdir -p $(dir $@)		#to check whether the directory is existed ot not 
 	$(CC) $(LDFLAGS) $^ -o $@
 
@@ -55,7 +68,7 @@ $(OBJ_DIR)/%.o: %.c
 
 #Phonies
 
-.PHONY: all clean flash cppcheck
+.PHONY: all clean flash cppcheck format
 
 all: $(TARGET)
 
@@ -68,6 +81,9 @@ flash: $(TARGET)
 cppcheck:
 	@$(CPPCHECK) --quiet --enable=all --error-exitcode=1 \
 		--inline-suppr \
-		-I (INCLUDE_DIRS) \
+		-I $(INCLUDE_DIRS) \
 		$(SOURCES) \
 		-i external/printf
+
+format:
+	@$(FORMAT) -i $(SOURCES) $(HEADERS)
