@@ -45,6 +45,19 @@ HEADERS = \
 OBJECT_NAMES = $(SOURCES:.c=.o)			#naming the .o files same as .c files
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(OBJECT_NAMES))		#automatically creating .o files
 
+#Static Analysis
+##Don't check the msp430 helper headers (they have a lot of ifdefs)
+CPPCHECK_INCLUDES = ./src
+CPPCHECK_IGNORE = external/printf
+CPPCHECK_FLAGS = \
+		 --quiet --enable=all --error-exitcode=1 \
+		 --inline-suppr \
+		 --check-config \
+		 --suppress=missingIncludeSystem \
+		 --suppress=unmatchedSuppression \
+		 --suppress=unusedFunction \
+		 $(addprefix -I,$(CPPCHECK_INCLUDES)) \
+		 $(ADDPREFIX -i,$(CPPCHECK_IGNORE))
 
 #Flags
 MCU = msp430f5529
@@ -73,17 +86,12 @@ $(OBJ_DIR)/%.o: %.c
 all: $(TARGET)
 
 clean:
-	$(RM) -r $(BUILD_DIR)
+	@$(RM) -rf $(BUILD_DIR)
 
 flash: $(TARGET)
-	$(DEBUG) tilib "prog $(TARGET)"
+	@$(DEBUG) tilib "prog $(TARGET)"
 
 cppcheck:
-	@$(CPPCHECK) --quiet --enable=all --error-exitcode=1 \
-		--inline-suppr \
-		-I $(INCLUDE_DIRS) \
-		$(SOURCES) \
-		-i external/printf
-
+	@$(CPPCHECK) $(CPPCHECK_FLAGS) $(SOURCES)
 format:
 	@$(FORMAT) -i $(SOURCES) $(HEADERS)
