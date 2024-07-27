@@ -81,7 +81,7 @@ flash: $(TARGET)
 cppcheck:
 	@$(CPPCHECK) --quiet --enable=all --error-exitcode=1 \
 		--inline-suppr \
-		-I (INCLUDE_DIRS) \
+		-I $(INCLUDE_DIRS) \
 		$(SOURCES) \
 		-i external/printf
 
