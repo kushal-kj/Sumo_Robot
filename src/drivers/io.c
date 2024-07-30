@@ -46,6 +46,51 @@ static volatile uint8_t *const port_sel1_regs[IO_PORT_CNT] = {&P1SEL, &P2SEL};
 // &P2SEL2};
 #endif
 
+#define UNUSED_CONFIG                                                          \
+  { IO_SELECT_GPIO, IO_PUPD_ENABLED, IO_DIR_OUTPUT, IO_OUT_LOW }
+
+/* This array holds the initial configuration of all IO pins/
+ */
+static const struct io_config
+    io_initial_configs[IO_PORT_CNT * IO_PIN_CNT_PER_PORT] = {
+
+        // Output
+        [IO_TEST_LED] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
+                         IO_OUT_LOW},
+
+        /* UART TX/RX
+         * Resistor: not needed (pulled by transmitter / receiver)
+         * Direction: not applicable
+         * Output: not applicable */
+        [IO_UART_RXD] = {IO_SELECT_ALT1, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
+                         IO_OUT_LOW},
+        [IO_UART_TXD] = {IO_SELECT_ALT1, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
+                         IO_OUT_LOW},
+
+#if defined(LAUNCHPAD)
+        // Unused pins
+        [IO_UNUSED_1] = UNUSED_CONFIG,
+        [IO_UNUSED_2] = UNUSED_CONFIG,
+        [IO_UNUSED_3] = UNUSED_CONFIG,
+        [IO_UNUSED_4] = UNUSED_CONFIG,
+        [IO_UNUSED_5] = UNUSED_CONFIG,
+        [IO_UNUSED_6] = UNUSED_CONFIG,
+        [IO_UNUSED_7] = UNUSED_CONFIG,
+        [IO_UNUSED_8] = UNUSED_CONFIG,
+        [IO_UNUSED_9] = UNUSED_CONFIG,
+        [IO_UNUSED_10] = UNUSED_CONFIG,
+        [IO_UNUSED_11] = UNUSED_CONFIG,
+        [IO_UNUSED_12] = UNUSED_CONFIG,
+#endif
+};
+
+void io_init(void) {
+  // Initialize all pins
+  for (io_e io = (io_e)IO_10; io < ARRAY_SIZE(io_initial_configs); io++) {
+    io_configure(io, &io_initial_configs[io]);
+  }
+}
+
 void io_configure(io_e io, const struct io_config *config) {
   io_set_select(io, config->select);
   io_set_direction(io, config->dir);
@@ -59,24 +104,25 @@ void io_set_select(io_e io, io_select_e select) {
   switch (select) {
   case IO_SELECT_GPIO:
     *port_sel1_regs[port] &= ~pin; // 0
-    //		*port_sel2_regs[port] &= ~pin;
+    //*port_sel2_regs[port] &= ~pin;
     break;
 
   case IO_SELECT_ALT1:
     *port_sel1_regs[port] |= pin; // 1
-    //		*port_sel2_regs[port] &= ~pin;
+    //*port_sel2_regs[port] &= ~pin;
     break;
     /*
-                    case IO_SELECT_ALT2:
-                            *port_sel1_regs[port] &= ~pin;		//2
-                            *port_sel2_regs[port] |= ~pin;
-                            break;
+              case IO_SELECT_ALT2:
+                      *port_sel1_regs[port] &= ~pin;		//2
+                      *port_sel2_regs[port] |= ~pin;
+                      break;
 
-                    case IO_SELECT_ALT3:
-                            *port_sel1_regs[port] |= pin;		//3
-                            *port_sel2_regs[port] |= pin;
-                            break;
-                            */
+              case IO_SELECT_ALT3:
+                      *port_sel1_regs[port] |= pin;		//3
+                      *port_sel2_regs[port] |= pin;
+                      break;
+
+    */
   }
 }
 

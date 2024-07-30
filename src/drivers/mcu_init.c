@@ -10,4 +10,5 @@ static void watchdog_stop(void) { WDTCTL = WDTPW + WDTHOLD; }
 void mcu_init(void) {
   // Must stop the watchdog first before anything else
   watchdog_stop();
+  io_init();
 }

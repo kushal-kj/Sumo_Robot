@@ -56,8 +56,8 @@ typedef enum {
 typedef enum {
   IO_SELECT_GPIO,
   IO_SELECT_ALT1,
-  /*IO_SELECT_ALT2,
-  IO_SELECT_ALT3, */
+  // IO_SELECT_ALT2,
+  // IO_SELECT_ALT3,
 } io_select_e; // function selection registers
 
 typedef enum {
@@ -90,6 +90,8 @@ struct io_config {
 };
 
 // TODO: functions
+
+void io_init(void);
 
 void io_configure(io_e io, const struct io_config *config);
 
