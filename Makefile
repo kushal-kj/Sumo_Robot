@@ -1,4 +1,5 @@
 #Directories
+#TOOLS_PATH = ~/dev/tools
 TOOLS_DIR = ${TOOLS_PATH}
 MSPGCC_ROOT_DIR = $(TOOLS_DIR)/msp430-gcc
 MSPGCC_BIN_DIR = $(MSPGCC_ROOT_DIR)/bin
@@ -29,10 +30,18 @@ FORMAT = clang-format-12
 TARGET = $(BIN_DIR)/sumo_robot
 
 SOURCES_WITH_HEADERS = \
-		       src/drivers/uart.c \
-		       src/drivers/i2c.c \
 		       src/app/drive.c \
 		       src/app/enemy.c \
+		       src/drivers/io.c \
+		       src/drivers/mcu_init.c \
+
+
+#SOURCES_WITH_HEADERS = \
+#		       src/drivers/uart.c \
+#		       src/drivers/i2c.c \
+#		       src/app/drive.c \
+#		       src/app/enemy.c \
+
 
 SOURCES = \
 	  src/main.c \
