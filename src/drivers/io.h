@@ -7,7 +7,7 @@
 
 // TODO: Improve multiple HW targets handling
 
-#define LAUNCHPAD
+//#define LAUNCHPAD
 
 // TODO: enums
 

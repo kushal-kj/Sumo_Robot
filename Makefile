@@ -1,3 +1,15 @@
+#Check arguments
+ifeq ($(HW),LAUNCHPAD)	#HW argument
+TARGET_NAME=launchpad
+else ifeq ($(MAKECMDGOALS),clean)
+else ifeq ($(MAKECMDGOALS),cppcheck)
+else ifeq ($(MAKECMDGOALS),format)
+#HW argument not required for this rule
+else
+$(error "Must pass HW=LAUNCHPAD")
+endif
+
+
 #Directories
 #TOOLS_PATH = ~/dev/tools
 TOOLS_DIR = ${TOOLS_PATH}
@@ -6,7 +18,7 @@ MSPGCC_BIN_DIR = $(MSPGCC_ROOT_DIR)/bin
 MSPGCC_INCLUDE_DIR = $(MSPGCC_ROOT_DIR)/include
 BUILD_DIR = build
 OBJ_DIR = $(BUILD_DIR)/obj
-BIN_DIR = $(BUILD_DIR)/bin
+
 TI_CCS_DIR = $(TOOLS_DIR)/ccs1271/ccs
 DEBUG_BIN_DIR = $(TI_CCS_DIR)/ccs_base/DebugServer/bin
 DEBUG_DRIVERS_DIR = $(TI_CCS_DIR)/ccs_base/DebugServer/drivers
@@ -27,7 +39,7 @@ CPPCHECK = cppcheck
 FORMAT = clang-format-12
 
 #Files
-TARGET = $(BIN_DIR)/sumo_robot
+TARGET = $(BUILD_DIR)/$(TARGET_NAME)
 
 SOURCES_WITH_HEADERS = \
 		       src/app/drive.c \
@@ -54,6 +66,11 @@ HEADERS = \
 OBJECT_NAMES = $(SOURCES:.c=.o)			#naming the .o files same as .c files
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(OBJECT_NAMES))		#automatically creating .o files
 
+
+#Defines
+HW_DEFINE = $(addprefix -D,$(HW))	#e.g. -DLAUNCHPAD
+DEFINES = $(HW_DEFINE)
+
 #Static Analysis
 ##Don't check the msp430 helper headers (they have a lot of ifdefs)
 CPPCHECK_INCLUDES = ./src
@@ -71,8 +88,8 @@ CPPCHECK_FLAGS = \
 #Flags
 MCU = msp430f5529
 WFLAGS = -Wall -Wextra -Werror -Wshadow					#warning flags
-CFLAGS = -mmcu=$(MCU) $(WFLAGS) $(addprefix -I,$(INCLUDE_DIRS)) -Og -g		#compiler flags
-LDFLAGS = -mmcu=$(MCU) $(addprefix -L,$(LIB_DIRS))			#Linker flags
+CFLAGS = -mmcu=$(MCU) $(WFLAGS) $(addprefix -I,$(INCLUDE_DIRS)) $(DEFINES) -Og -g		#compiler flags
+LDFLAGS = -mmcu=$(MCU) $(DEFINES) $(addprefix -L,$(LIB_DIRS))			#Linker flags
 
 
 #Build
