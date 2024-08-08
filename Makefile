@@ -90,7 +90,7 @@ CPPCHECK_FLAGS = \
 #Flags
 MCU = msp430f5529
 WFLAGS = -Wall -Wextra -Werror -Wshadow					#warning flags
-CFLAGS = -mmcu=$(MCU) $(WFLAGS) $(addprefix -I,$(INCLUDE_DIRS)) $(DEFINES) -Og -g		#compiler flags
+CFLAGS = -mmcu=$(MCU) $(WFLAGS) -fshort-enums $(addprefix -I,$(INCLUDE_DIRS)) $(DEFINES) -Og -g		#compiler flags
 LDFLAGS = -mmcu=$(MCU) $(DEFINES) $(addprefix -L,$(LIB_DIRS))			#Linker flags
 
 

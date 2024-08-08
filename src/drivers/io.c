@@ -1,6 +1,7 @@
 #include "drivers/io.h"
 #include "common/defines.h"
 
+#include <assert.h>
 #include <msp430.h>
 #include <stdint.h>
 
@@ -11,10 +12,14 @@
 #define IO_INTERRUPT_PORT_CNT (2u)
 
 /* To extract port and pin bit from enum io_generic_e (io_e).
- * Enums are represented as 16-bit by default on MSP430, so given
- * that the pins are ordered in increasing order(see io_generic_e),
- * and that there are 2 ports and 8 pins, the enum value can be viewed as:
- * [Zeros (11-bits) | Port (2-bits) | Pin(3-bits)] */
+ * With complier flag "-fshort-enums", the enums are represented
+ * as a single byte(8-bit), so given that the pins are ordered
+ * in increasing order(see io_generic_e), and that there are
+ * 2 ports and 8 pins, the enum value can be viewed as:
+ * [Zeros (3-bits) | Port (2-bits) | Pin(3-bits)] */
+
+static_assert(sizeof(io_generic_e) == 1,
+              "Unexpected size, -fshort-enums missing?");
 
 #define IO_PORT_OFFSET (3u)
 #define IO_PORT_MASK (0x3u << IO_PORT_OFFSET)
