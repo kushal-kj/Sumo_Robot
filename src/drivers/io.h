@@ -1,6 +1,8 @@
 #ifndef IO_H
 #define IO_H
 
+#include <stdbool.h>
+
 /* IO pins handling including pinmapping,initialization, and configuration.
  * This wraps the more crude register defines provided in the headers from
  * Texas instrument */
@@ -94,6 +96,10 @@ struct io_config {
 void io_init(void);
 
 void io_configure(io_e io, const struct io_config *config);
+
+void io_get_current_config(io_e io, struct io_config *current_config);
+bool io_config_compare(const struct io_config *cfg1,
+                       const struct io_config *cfg2);
 
 void io_set_select(io_e io, io_select_e select);
 void io_set_direction(io_e io, io_dir_e direction);

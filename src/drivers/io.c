@@ -98,6 +98,23 @@ void io_configure(io_e io, const struct io_config *config) {
   io_set_pupd(io, config->pupd_resistor);
 }
 
+void io_get_current_config(io_e io, struct io_config *current_config) {
+  const uint8_t port = io_port(io);
+  const uint8_t pin = io_pin_bit(io);
+  const uint8_t sel1 = *port_sel1_regs[port] & pin;
+  current_config->select = (io_select_e)(sel1);
+  current_config->pupd_resistor = (io_pupd_e)(*port_ren_regs[port] & pin);
+  current_config->dir = (io_dir_e)(*port_dir_regs[port] & pin);
+  current_config->out = (io_out_e)(*port_out_regs[port] & pin);
+}
+
+bool io_config_compare(const struct io_config *cfg1,
+                       const struct io_config *cfg2) {
+  return (cfg1->dir == cfg2->dir) && (cfg1->out == cfg2->out) &&
+         (cfg1->pupd_resistor == cfg2->pupd_resistor) &&
+         (cfg1->select == cfg2->select);
+}
+
 void io_set_select(io_e io, io_select_e select) {
   const uint8_t port = io_port(io);
   const uint8_t pin = io_pin_bit(io);

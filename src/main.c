@@ -1,28 +1,36 @@
+#include "common/assert_handler.h"
+#include "common/defines.h"
 #include "drivers/io.h"
+#include "drivers/led.h"
 #include "drivers/mcu_init.h"
 #include <msp430.h>
 
 static void test_setup(void) { mcu_init(); }
 
+/*
+static void test_assert(void) {
+  test_setup();
+  ASSERT(0);
+}
+*/
+
 static void test_blink_led(void) {
   test_setup();
+  led_init();
+  // led_init(); // To check whether the assert_handler triggers or not
 
-  const struct io_config led_config = {.dir = IO_DIR_OUTPUT,
-                                       .select = IO_SELECT_GPIO,
-                                       .pupd_resistor = IO_PUPD_DISABLED,
-                                       .out = IO_OUT_LOW};
+  led_state_e led_state = LED_STATE_OFF;
 
-  io_configure(IO_TEST_LED, &led_config);
-  io_out_e out = IO_OUT_LOW;
   while (1) {
-    out = (out == IO_OUT_LOW) ? IO_OUT_HIGH : IO_OUT_LOW;
-    io_set_out(IO_TEST_LED, out);
-    __delay_cycles(250000); // 250ms
+    led_state = (led_state == LED_STATE_OFF) ? LED_STATE_ON : LED_STATE_OFF;
+    led_set(LED_TEST, led_state);
+    BUSY_WAIT_ms(1000); // 1 sec delay
   }
 }
 
 int main(void) {
   //  WDTCTL = WDTPW + WDTHOLD;
   test_blink_led();
+  // test_assert();
   return 0;
 }
