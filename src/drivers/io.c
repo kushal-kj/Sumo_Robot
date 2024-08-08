@@ -1,6 +1,7 @@
 #include "drivers/io.h"
 #include "common/defines.h"
 
+#include <assert.h>
 #include <msp430.h>
 #include <stdint.h>
 
@@ -11,10 +12,14 @@
 #define IO_INTERRUPT_PORT_CNT (2u)
 
 /* To extract port and pin bit from enum io_generic_e (io_e).
- * Enums are represented as 16-bit by default on MSP430, so given
- * that the pins are ordered in increasing order(see io_generic_e),
- * and that there are 2 ports and 8 pins, the enum value can be viewed as:
- * [Zeros (11-bits) | Port (2-bits) | Pin(3-bits)] */
+ * With complier flag "-fshort-enums", the enums are represented
+ * as a single byte(8-bit), so given that the pins are ordered
+ * in increasing order(see io_generic_e), and that there are
+ * 2 ports and 8 pins, the enum value can be viewed as:
+ * [Zeros (3-bits) | Port (2-bits) | Pin(3-bits)] */
+
+static_assert(sizeof(io_generic_e) == 1,
+              "Unexpected size, -fshort-enums missing?");
 
 #define IO_PORT_OFFSET (3u)
 #define IO_PORT_MASK (0x3u << IO_PORT_OFFSET)
@@ -96,6 +101,23 @@ void io_configure(io_e io, const struct io_config *config) {
   io_set_direction(io, config->dir);
   io_set_out(io, config->out);
   io_set_pupd(io, config->pupd_resistor);
+}
+
+void io_get_current_config(io_e io, struct io_config *current_config) {
+  const uint8_t port = io_port(io);
+  const uint8_t pin = io_pin_bit(io);
+  const uint8_t sel1 = *port_sel1_regs[port] & pin;
+  current_config->select = (io_select_e)(sel1);
+  current_config->pupd_resistor = (io_pupd_e)(*port_ren_regs[port] & pin);
+  current_config->dir = (io_dir_e)(*port_dir_regs[port] & pin);
+  current_config->out = (io_out_e)(*port_out_regs[port] & pin);
+}
+
+bool io_config_compare(const struct io_config *cfg1,
+                       const struct io_config *cfg2) {
+  return (cfg1->dir == cfg2->dir) && (cfg1->out == cfg2->out) &&
+         (cfg1->pupd_resistor == cfg2->pupd_resistor) &&
+         (cfg1->select == cfg2->select);
 }
 
 void io_set_select(io_e io, io_select_e select) {
