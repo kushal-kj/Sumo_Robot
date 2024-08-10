@@ -16,3 +16,6 @@ jobs:
       
       - name: Set TOOLS_PATH and run make
         run: TOOLS_PATH=/home/ubuntu/dev/tools make HW=LAUNCHPAD
+
+      - name: Set TOOLS_PATH for running TEST functions through bash scripts
+        run: TOOLS_PATH=/home/ubuntu/dev/tools tools/build_tests.sh
