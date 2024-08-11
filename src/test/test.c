@@ -127,6 +127,44 @@ static void test_launchpad_io_pins_input(void)
 	}
 }
 
+
+SUPPRESS_UNUSED
+static void io_12_isr(void)
+{
+	led_set(LED_TEST, LED_STATE_ON);
+}
+
+SUPPRESS_UNUSED
+static void io_22_isr(void)
+{
+	led_set(LED_TEST, LED_STATE_OFF);
+}
+
+
+
+//TESTING INTERRUPT
+SUPPRESS_UNUSED
+static void test_io_interrupt(void)
+{
+	test_setup();
+	const struct io_config input_config = {
+		.select = IO_SELECT_GPIO,
+		.pupd_resistor = IO_PUPD_ENABLED,
+		.dir = IO_DIR_INPUT,
+		.out = IO_OUT_HIGH //pull-up
+	};
+
+	io_configure(IO_12, &input_config);
+	io_configure(IO_22, &input_config);
+	led_init();
+	io_configure_interrupt(IO_12, IO_TRIGGER_FALLING, io_12_isr);
+	io_configure_interrupt(IO_22, IO_TRIGGER_FALLING, io_22_isr);
+	io_enable_interrupt(IO_12);
+	io_enable_interrupt(IO_22);
+	while(1);
+}
+
+
 int main()
 {
 	TEST();
