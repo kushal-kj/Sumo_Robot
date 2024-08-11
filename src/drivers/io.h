@@ -82,6 +82,11 @@ typedef enum {
   IO_IN_HIGH,
 } io_in_e; // input register
 
+typedef enum {
+  IO_TRIGGER_RISING,
+  IO_TRIGGER_FALLING,
+} io_trigger_e;
+
 // TODO: structs
 
 struct io_config {
@@ -106,5 +111,12 @@ void io_set_direction(io_e io, io_dir_e direction);
 void io_set_pupd(io_e io, io_pupd_e pupd_resistor);
 void io_set_out(io_e io, io_out_e out);
 io_in_e io_get_input(io_e io); // the input register function returns a value
+
+// INTERRUPTS
+typedef void (*isr_function)(void); // function pointer of type void
+void io_configure_interrupt(io_e io, io_trigger_e trigger, isr_function isr);
+void io_deconfigure_interrupt(io_e io);
+void io_enable_interrupt(io_e io);
+void io_disable_interrupt(io_e io);
 
 #endif // IO_H
