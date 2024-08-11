@@ -9,7 +9,9 @@
 
 // Clock rate calculation when it is set to default 1MHZ
 #define CYCLES_1MHZ (1000000u)
-#define ms_TO_CYCLES(ms) ((CYCLES_1MHZ / 1000u) * ms)
+#define CYCLES_16MHZ (16u * CYCLES_1MHZ)
+#define CYCLES_PER_MS (CYCLES_16MHZ / 1000u)
+#define ms_TO_CYCLES(ms) (CYCLES_PER_MS * ms)
 #define BUSY_WAIT_ms(ms) (__delay_cycles(ms_TO_CYCLES(ms)))
 
 #endif // DEFINES_H
