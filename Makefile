@@ -57,11 +57,13 @@ TARGET = $(BUILD_DIR)/bin/$(TARGET_HW)/$(TARGET_NAME)
 
 SOURCES_WITH_HEADERS = \
 					   src/common/assert_handler.c \
+					   src/common/ring_buffer.c \
 					   src/app/drive.c \
 					   src/drivers/led.c \
 					   src/app/enemy.c \
 					   src/drivers/io.c \
 					   src/drivers/mcu_init.c \
+					   src/drivers/uart.c \
 
 
 #SOURCES_WITH_HEADERS = \

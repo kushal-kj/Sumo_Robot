@@ -3,6 +3,7 @@
 #include "drivers/io.h"
 #include "drivers/led.h"
 #include "drivers/mcu_init.h"
+#include "drivers/uart.h"
 #include <msp430.h>
 
 SUPPRESS_UNUSED
@@ -164,6 +165,19 @@ static void test_io_interrupt(void)
 	while(1);
 }
 
+
+//TESTING UART
+SUPPRESS_UNUSED
+static void test_uart(void)
+{
+	test_setup();
+	uart_init();
+	while(1)
+	{
+		uart_print_interrupt("Sumo Robot\n");
+		BUSY_WAIT_ms(100);
+	}
+}
 
 int main()
 {
