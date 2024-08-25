@@ -39,7 +39,7 @@ LIB_DIRS = $(MSPGCC_INCLUDE_DIR)
 INCLUDE_DIRS = $(MSPGCC_INCLUDE_DIR) \
 	       ./src \
 	       ./external/ \
-	       ./external/printf
+	       ./
 
 
 
@@ -64,6 +64,7 @@ SOURCES_WITH_HEADERS = \
 					   src/drivers/io.c \
 					   src/drivers/mcu_init.c \
 					   src/drivers/uart.c \
+					   external/printf/printf.c \
 
 
 #SOURCES_WITH_HEADERS = \
@@ -108,6 +109,8 @@ TEST_DEFINE = $(addprefix -DTEST=,$(TEST))
 DEFINES = \
 		  $(HW_DEFINE) \
 		  $(TEST_DEFINE) \
+		  -DPRINTF_INCLUDE_CONFIG_H \
+
 
 #Static Analysis
 ##Don't check the msp430 helper headers (they have a lot of ifdefs)

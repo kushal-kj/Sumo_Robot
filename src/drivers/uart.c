@@ -1,5 +1,6 @@
 #include "drivers/uart.h"
 #include "common/assert_handler.h"
+#include "common/defines.h"
 #include "common/ring_buffer.h"
 #include <assert.h>
 #include <msp430.h>
@@ -69,37 +70,35 @@ static void uart_tx_start(void) {
   }
 }
 
-__attribute__((interrupt(USCI_A0_VECTOR))) void USCI_A0_ISR(void) {
+INTERRUPT_FUNCTION(USCI_A0_VECTOR) USCI_A0_ISR(){
+	switch (__even_in_range(UCA0IV, 4)) {
+		case 0:
+			break; // No interrupt
+		case 2:
+			break; // RX interrupt (ignored)
+		case 4:  // TX interrupt
+			ASSERT_INTERRUPT(!ring_buffer_empty(&tx_buffer));
 
-  switch (__even_in_range(UCA0IV, 4)) {
-  case 0:
-    break; // No interrupt
-  case 2:
-    break; // RX interrupt (ignored)
-  case 4:  // TX interrupt
-    if (ring_buffer_empty(&tx_buffer)) {
-      // Add and assert here
-      while (1)
-        ;
-    }
+      // Remove the transmitted data byte from the buffer
+			ring_buffer_get(&tx_buffer);
 
-    // Remove the transmitted data byte from the buffer
-    ring_buffer_get(&tx_buffer);
+      // Clear interrupt here to avoid accidently clearing interrupt for next
+      // transmission
+			uart_tx_clear_interrupt();
 
-    // Clear interrupt here to avoid accidently clearing interrupt for next
-    // transmission
-    uart_tx_clear_interrupt();
-
-    // Check whether the buffer is empty, if not, then transmit the data
-    // remaining in the buffer until it is empty.
-    if (!ring_buffer_empty(&tx_buffer)) {
-      uart_tx_start();
-    }
-    break;
-  default:
-    break;
-  }
+      // Check whether the buffer is empty, if not, then transmit the data
+      // remaining in the buffer until it is empty.
+			if (!ring_buffer_empty(&tx_buffer)) {
+				uart_tx_start();
+			}
+			break;
+		default:
+			break;
+	}
+  // If there's a stray closing brace or an incomplete do-while loop,
+  // the compiler might throw the error here.
 }
+
 
 // This function will initialize the UART peripheral
 void uart_init(void) {
@@ -153,6 +152,7 @@ void uart_putchar_polling(char c) {
   }
 }
 
+/*
 // This function will send characters through Interrupt method
 void uart_putchar_interrupt(char c) {
   // Poll is full
@@ -178,7 +178,36 @@ void uart_putchar_interrupt(char c) {
     uart_putchar_interrupt('\r');
   }
 }
+*/
 
+// mpland/printf needs this to be named _putchar.
+// Custom printf implementation.
+void _putchar(char c) {
+  // Poll is full
+  while (ring_buffer_full(&tx_buffer))
+    ;
+
+  // Disable the tx interrupt before starting the transmission
+  uart_tx_disable_interrupt();
+
+  // Check if there is any ongoing transmission.
+  const bool tx_ongoing = !ring_buffer_empty(&tx_buffer);
+
+  ring_buffer_put(&tx_buffer, c);
+
+  if (!tx_ongoing) {
+    uart_tx_start();
+  }
+
+  uart_tx_enable_interrupt();
+
+  // Carriage return(\r) after line feed(\n) for proper new line.
+  if (c == '\n') {
+    _putchar('\r');
+  }
+}
+
+/*
 // To print an entire string of characters
 void uart_print_interrupt(const char *string) {
   int i = 0;
@@ -187,3 +216,5 @@ void uart_print_interrupt(const char *string) {
     i++;
   }
 }
+
+*/
