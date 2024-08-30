@@ -5,8 +5,8 @@
 #include "drivers/mcu_init.h"
 #include "drivers/uart.h"
 #include <msp430.h>
-#include "external/printf/printf.h"
-
+//#include "external/printf/printf.h"
+#include "common/trace.h"
 
 SUPPRESS_UNUSED
 static void test_setup(void) 
@@ -177,11 +177,13 @@ static void test_uart(void)
 	while(1)
 	{
 		//uart_print_interrupt("Sumo Robot\n");
+		
 		_putchar('s');
 		_putchar('u');
 		_putchar('m');
 		_putchar('o');
 		_putchar('\n');
+		
 		BUSY_WAIT_ms(100);
 	}
 }
@@ -190,10 +192,16 @@ SUPPRESS_UNUSED
 static void test_trace(void)
 {
 	test_setup();
-	uart_init();
+	trace_init();
 	while(1)
 	{
-		printf("Sumo robot %d\n",2024);
+		//printf("Sumo robot %d\n",2024);
+		TRACE("sumo robot %d\n",2024);
+
+		/* TRACE working:
+		 * TRACE(...)-> trace()->printf->_putchar->uarttxbuf
+		 * */
+		BUSY_WAIT_ms(100);
 	}
 }
 

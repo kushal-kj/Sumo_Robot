@@ -70,36 +70,37 @@ static void uart_tx_start(void) {
   }
 }
 
-INTERRUPT_FUNCTION(USCI_A0_VECTOR) USCI_A0_ISR(){
-	switch (__even_in_range(UCA0IV, 4)) {
-		case 0:
-			break; // No interrupt
-		case 2:
-			break; // RX interrupt (ignored)
-		case 4:  // TX interrupt
-			ASSERT_INTERRUPT(!ring_buffer_empty(&tx_buffer));
+INTERRUPT_FUNCTION(USCI_A0_VECTOR) USCI_A0_ISR(void) {
+  switch (__even_in_range(UCA0IV, 4)) {
+  case 0:
+    break; // No interrupt
+  case 2:
+    break; // RX interrupt (ignored)
+  case 4:  // TX interrupt
 
-      // Remove the transmitted data byte from the buffer
-			ring_buffer_get(&tx_buffer);
+    ASSERT_INTERRUPT(!ring_buffer_empty(&tx_buffer));
 
-      // Clear interrupt here to avoid accidently clearing interrupt for next
-      // transmission
-			uart_tx_clear_interrupt();
+    // Remove the transmitted data byte from the buffer
+    ring_buffer_get(&tx_buffer);
 
-      // Check whether the buffer is empty, if not, then transmit the data
-      // remaining in the buffer until it is empty.
-			if (!ring_buffer_empty(&tx_buffer)) {
-				uart_tx_start();
-			}
-			break;
-		default:
-			break;
-	}
+    // Clear interrupt here to avoid accidently clearing interrupt for next
+    // transmission
+    uart_tx_clear_interrupt();
+
+    // Check whether the buffer is empty, if not, then transmit the data
+    // remaining in the buffer until it is empty.
+    if (!ring_buffer_empty(&tx_buffer)) {
+      uart_tx_start();
+    }
+    break;
+  default:
+    break;
+  }
   // If there's a stray closing brace or an incomplete do-while loop,
   // the compiler might throw the error here.
 }
 
-
+static bool initialized = false;
 // This function will initialize the UART peripheral
 void uart_init(void) {
   /* Reset module. It stays in reset until cleared. The module should be in
@@ -134,22 +135,24 @@ void uart_init(void) {
 
   // Enable the TX interrupt
   uart_tx_enable_interrupt();
+
+  initialized = true;
 }
 
 // This function will send a single character through polling method
 void uart_putchar_polling(char c) {
-  // Wait for any ongoing transmission to finish.
-  // Check for USCI A0 Interrupt flag register i.e. UCA0IFG which contains TX
-  // and RX interrupt buffer flags
-  while (!(UCA0IFG & UCTXIFG))
-    ;
-
-  UCA0TXBUF = c;
 
   // Carriage return(\r) after line feed(\n) for proper new line.
   if (c == '\n') {
     uart_putchar_polling('\r');
   }
+
+  // Wait for any ongoing transmission to finish.
+  // Check for USCI A0 Interrupt flag register i.e. UCA0IFG which contains TX
+  // and RX interrupt buffer flags
+  while (!(UCA0IFG & UCTXIFG)) {
+  }
+  UCA0TXBUF = c;
 }
 
 /*
@@ -178,14 +181,20 @@ void uart_putchar_interrupt(char c) {
     uart_putchar_interrupt('\r');
   }
 }
-*/
 
+*/
 // mpland/printf needs this to be named _putchar.
 // Custom printf implementation.
 void _putchar(char c) {
+
+  // Carriage return(\r) before line feed(\n) for proper new line.
+  if (c == '\n') {
+    _putchar('\r');
+  }
+
   // Poll is full
-  while (ring_buffer_full(&tx_buffer))
-    ;
+  while (ring_buffer_full(&tx_buffer)) {
+  }
 
   // Disable the tx interrupt before starting the transmission
   uart_tx_disable_interrupt();
@@ -200,11 +209,6 @@ void _putchar(char c) {
   }
 
   uart_tx_enable_interrupt();
-
-  // Carriage return(\r) after line feed(\n) for proper new line.
-  if (c == '\n') {
-    _putchar('\r');
-  }
 }
 
 /*
@@ -216,5 +220,4 @@ void uart_print_interrupt(const char *string) {
     i++;
   }
 }
-
 */

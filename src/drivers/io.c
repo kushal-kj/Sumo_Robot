@@ -8,12 +8,13 @@
 #include <stdint.h>
 
 #if defined(LAUNCHPAD)
-#define IO_PORT_CNT (2u)
+
+#define IO_PORT_CNT (3u)
 #endif
 
 #define IO_PIN_CNT_PER_PORT (8u)
 
-#define IO_INTERRUPT_PORT_CNT (2u)
+#define IO_INTERRUPT_PORT_CNT (3u)
 
 /* To extract port and pin bit from enum io_generic_e (io_e).
  * With complier flag "-fshort-enums", the enums are represented
@@ -39,10 +40,7 @@ static inline uint8_t io_pin_idx(io_e io) { return io & IO_PIN_MASK; }
 
 static inline uint8_t io_pin_bit(io_e io) { return 1 << io_pin_idx(io); }
 
-typedef enum {
-  IO_PORT1,
-  IO_PORT2,
-} io_port_e;
+typedef enum { IO_PORT1, IO_PORT2, IO_PORT3 } io_port_e;
 
 /* TI's helper header (msp430.h) provides defines/variables for accessing the
  * registers, and the address of these are resolved during linking. For cleaner
@@ -51,11 +49,16 @@ typedef enum {
  * access them through array indexing. */
 
 #if defined(LAUNCHPAD)
-static volatile uint8_t *const port_dir_regs[IO_PORT_CNT] = {&P1DIR, &P2DIR};
-static volatile uint8_t *const port_ren_regs[IO_PORT_CNT] = {&P1REN, &P2REN};
-static volatile uint8_t *const port_out_regs[IO_PORT_CNT] = {&P1OUT, &P2OUT};
-static volatile uint8_t *const port_in_regs[IO_PORT_CNT] = {&P1IN, &P2IN};
-static volatile uint8_t *const port_sel1_regs[IO_PORT_CNT] = {&P1SEL, &P2SEL};
+static volatile uint8_t *const port_dir_regs[IO_PORT_CNT] = {&P1DIR, &P2DIR,
+                                                             &P3DIR};
+static volatile uint8_t *const port_ren_regs[IO_PORT_CNT] = {&P1REN, &P2REN,
+                                                             &P3REN};
+static volatile uint8_t *const port_out_regs[IO_PORT_CNT] = {&P1OUT, &P2OUT,
+                                                             &P3OUT};
+static volatile uint8_t *const port_in_regs[IO_PORT_CNT] = {&P1IN, &P2IN,
+                                                            &P3IN};
+static volatile uint8_t *const port_sel1_regs[IO_PORT_CNT] = {&P1SEL, &P2SEL,
+                                                              &P3SEL};
 // static volatile uint8_t *const port_sel2_regs[IO_PORT_CNT] = {&P1SEL2,
 // &P2SEL2};
 #endif

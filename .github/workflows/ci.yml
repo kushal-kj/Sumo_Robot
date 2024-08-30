@@ -7,6 +7,8 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v3
+        with:
+          submodules: "true"
       
       - name: Formatting the code
         run: make format && git diff --quiet

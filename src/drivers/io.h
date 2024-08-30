@@ -30,6 +30,15 @@ typedef enum {
   IO_25,
   IO_26,
   IO_27,
+  IO_30,
+  IO_31,
+  IO_32,
+  IO_33,
+  IO_34,
+  IO_35,
+  IO_36,
+  IO_37,
+
 } io_generic_e;
 
 //clang-format on
@@ -38,8 +47,8 @@ typedef enum {
 #if defined(LAUNCHPAD)
 
   IO_TEST_LED = IO_10,
-  IO_UART_RXD = IO_12,
-  IO_UART_TXD = IO_13,
+  IO_UART_RXD = IO_34,
+  IO_UART_TXD = IO_33,
   IO_UNUSED_1 = IO_14,
   IO_UNUSED_2 = IO_15,
   IO_UNUSED_3 = IO_16,
