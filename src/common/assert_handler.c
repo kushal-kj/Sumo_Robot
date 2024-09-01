@@ -1,5 +1,7 @@
 #include "common/assert_handler.h"
 #include "common/defines.h"
+#include "drivers/uart.h"
+#include "external/printf/printf.h"
 #include <msp430.h>
 
 /* The TI compiler provides intrinsic support for calling a specific opcode,
@@ -9,18 +11,25 @@
 
 #define BREAKPOINT __asm volatile("CLR.B R3");
 
-/*Minimize code dependency in this function to reduce the risk of accidently
- * calling a function with an assert in it, in which would cause the
- * assert_handler to be called recursively until statck overflow. */
+/* Since the max length os program counter is 6 i.e., 0xFFFF,
+ * (Text + Program_counter + Null termination)
+ */
+#define ASSERT_STRING_MAX_SIZE (15u + 6u + 1U)
 
-void assert_handler(void) {
-  // Turn off motors ("safe state")
+static void assert_trace(uint16_t program_counter) {
+  // UART TX
+  P3SEL |= BIT3;
 
-  // Trace to console
+  uart_init_assert();
 
-  // Breakpoint
+  char assert_string[ASSERT_STRING_MAX_SIZE];
+  snprintf(assert_string, sizeof(assert_string), "ASSERT 0x%x\n",
+           program_counter);
 
-  BREAKPOINT
+  uart_trace_assert(assert_string);
+}
+
+static void assert_blink_led(void) {
 
   // Blink LED indefinetly when assertion is triggered.
 
@@ -34,4 +43,21 @@ void assert_handler(void) {
     P1OUT ^= BIT0;
     BUSY_WAIT_ms(250); // 250ms delay
   }
+}
+
+/*Minimize code dependency in this function to reduce the risk of accidently
+ * calling a function with an assert in it, in which would cause the
+ * assert_handler to be called recursively until statck overflow. */
+
+void assert_handler(uint16_t program_counter) {
+  // Turn off motors ("safe state")
+
+  // Breakpoint
+  BREAKPOINT
+
+  // Trace assert to console
+  assert_trace(program_counter);
+
+  // Blink LED indefinetly when assertion is triggered.
+  assert_blink_led();
 }

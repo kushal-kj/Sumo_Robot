@@ -17,4 +17,10 @@ void uart_print_interrupt(const char *string);
 
 void _putchar(char c);
 
+// For ASSERTION
+// These 2 functions should ONLY called by ASSERT_HANDLER
+void uart_init_assert(void);
+
+void uart_trace_assert(const char *string);
+
 #endif /* UART_H_ */

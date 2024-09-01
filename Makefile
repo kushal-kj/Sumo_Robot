@@ -51,6 +51,8 @@ CPPCHECK = cppcheck
 FORMAT = clang-format-12
 SIZE=$(MSPGCC_BIN_DIR)/msp430-elf-size
 READELF=$(MSPGCC_BIN_DIR)/msp430-elf-readelf
+ADDR2LINE = $(MSPGCC_BIN_DIR)/msp430-elf-addr2line
+
 
 #Files
 TARGET = $(BUILD_DIR)/bin/$(TARGET_HW)/$(TARGET_NAME)
@@ -153,7 +155,7 @@ $(OBJ_DIR)/%.o: %.c
 
 #Phonies
 
-.PHONY: all clean flash cppcheck format size symbols
+.PHONY: all clean flash cppcheck format size symbols addr2line
 
 all: $(TARGET)
 
@@ -175,3 +177,5 @@ symbols: $(TARGET)
 	#List symbols table sorted by size
 	@$(READELF) -s $(TARGET) | sort -n -k3
 
+addr2line: $(TARGET)
+	@$(ADDR2LINE) -e $(TARGET) $(ADDR)

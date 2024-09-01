@@ -100,9 +100,7 @@ INTERRUPT_FUNCTION(USCI_A0_VECTOR) USCI_A0_ISR(void) {
   // the compiler might throw the error here.
 }
 
-static bool initialized = false;
-// This function will initialize the UART peripheral
-void uart_init(void) {
+static void uart_configure(void) {
   /* Reset module. It stays in reset until cleared. The module should be in
    * reset condition while configured, according to msp430x5xx family user
    * guide.
@@ -128,6 +126,15 @@ void uart_init(void) {
 
   // Clear reset to release module for operation.
   UCA0CTL1 &= ~UCSWRST;
+}
+
+static bool initialized = false;
+// This function will initialize the UART peripheral
+void uart_init(void) {
+
+  ASSERT(!initialized);
+
+  uart_configure();
 
   // Interrupt triggers when TX buffer is empty, which it is after boot, so need
   // to clear it here.
@@ -221,3 +228,17 @@ void uart_print_interrupt(const char *string) {
   }
 }
 */
+
+// FOR ASSERTION
+void uart_init_assert(void) {
+  uart_tx_disable_interrupt();
+  uart_configure();
+}
+
+void uart_trace_assert(const char *string) {
+  int i = 0;
+  while (string[i] != '\0') {
+    uart_putchar_polling(string[i]);
+    i++;
+  }
+}
