@@ -1,5 +1,6 @@
 #include "drivers/uart.h"
 #include "common/assert_handler.h"
+#include "common/defines.h"
 #include "common/ring_buffer.h"
 #include <assert.h>
 #include <msp430.h>
@@ -69,19 +70,15 @@ static void uart_tx_start(void) {
   }
 }
 
-__attribute__((interrupt(USCI_A0_VECTOR))) void USCI_A0_ISR(void) {
-
+INTERRUPT_FUNCTION(USCI_A0_VECTOR) USCI_A0_ISR(void) {
   switch (__even_in_range(UCA0IV, 4)) {
   case 0:
     break; // No interrupt
   case 2:
     break; // RX interrupt (ignored)
   case 4:  // TX interrupt
-    if (ring_buffer_empty(&tx_buffer)) {
-      // Add and assert here
-      while (1)
-        ;
-    }
+
+    ASSERT_INTERRUPT(!ring_buffer_empty(&tx_buffer));
 
     // Remove the transmitted data byte from the buffer
     ring_buffer_get(&tx_buffer);
@@ -99,10 +96,11 @@ __attribute__((interrupt(USCI_A0_VECTOR))) void USCI_A0_ISR(void) {
   default:
     break;
   }
+  // If there's a stray closing brace or an incomplete do-while loop,
+  // the compiler might throw the error here.
 }
 
-// This function will initialize the UART peripheral
-void uart_init(void) {
+static void uart_configure(void) {
   /* Reset module. It stays in reset until cleared. The module should be in
    * reset condition while configured, according to msp430x5xx family user
    * guide.
@@ -128,6 +126,15 @@ void uart_init(void) {
 
   // Clear reset to release module for operation.
   UCA0CTL1 &= ~UCSWRST;
+}
+
+static bool initialized = false;
+// This function will initialize the UART peripheral
+void uart_init(void) {
+
+  ASSERT(!initialized);
+
+  uart_configure();
 
   // Interrupt triggers when TX buffer is empty, which it is after boot, so need
   // to clear it here.
@@ -135,24 +142,27 @@ void uart_init(void) {
 
   // Enable the TX interrupt
   uart_tx_enable_interrupt();
+
+  initialized = true;
 }
 
 // This function will send a single character through polling method
 void uart_putchar_polling(char c) {
-  // Wait for any ongoing transmission to finish.
-  // Check for USCI A0 Interrupt flag register i.e. UCA0IFG which contains TX
-  // and RX interrupt buffer flags
-  while (!(UCA0IFG & UCTXIFG))
-    ;
-
-  UCA0TXBUF = c;
 
   // Carriage return(\r) after line feed(\n) for proper new line.
   if (c == '\n') {
     uart_putchar_polling('\r');
   }
+
+  // Wait for any ongoing transmission to finish.
+  // Check for USCI A0 Interrupt flag register i.e. UCA0IFG which contains TX
+  // and RX interrupt buffer flags
+  while (!(UCA0IFG & UCTXIFG)) {
+  }
+  UCA0TXBUF = c;
 }
 
+/*
 // This function will send characters through Interrupt method
 void uart_putchar_interrupt(char c) {
   // Poll is full
@@ -179,11 +189,56 @@ void uart_putchar_interrupt(char c) {
   }
 }
 
+*/
+// mpland/printf needs this to be named _putchar.
+// Custom printf implementation.
+void _putchar(char c) {
+
+  // Carriage return(\r) before line feed(\n) for proper new line.
+  if (c == '\n') {
+    _putchar('\r');
+  }
+
+  // Poll is full
+  while (ring_buffer_full(&tx_buffer)) {
+  }
+
+  // Disable the tx interrupt before starting the transmission
+  uart_tx_disable_interrupt();
+
+  // Check if there is any ongoing transmission.
+  const bool tx_ongoing = !ring_buffer_empty(&tx_buffer);
+
+  ring_buffer_put(&tx_buffer, c);
+
+  if (!tx_ongoing) {
+    uart_tx_start();
+  }
+
+  uart_tx_enable_interrupt();
+}
+
+/*
 // To print an entire string of characters
 void uart_print_interrupt(const char *string) {
   int i = 0;
   while (string[i] != '\0') {
     uart_putchar_interrupt(string[i]);
+    i++;
+  }
+}
+*/
+
+// FOR ASSERTION
+void uart_init_assert(void) {
+  uart_tx_disable_interrupt();
+  uart_configure();
+}
+
+void uart_trace_assert(const char *string) {
+  int i = 0;
+  while (string[i] != '\0') {
+    uart_putchar_polling(string[i]);
     i++;
   }
 }

@@ -39,7 +39,7 @@ LIB_DIRS = $(MSPGCC_INCLUDE_DIR)
 INCLUDE_DIRS = $(MSPGCC_INCLUDE_DIR) \
 	       ./src \
 	       ./external/ \
-	       ./external/printf
+	       ./
 
 
 
@@ -51,6 +51,8 @@ CPPCHECK = cppcheck
 FORMAT = clang-format-12
 SIZE=$(MSPGCC_BIN_DIR)/msp430-elf-size
 READELF=$(MSPGCC_BIN_DIR)/msp430-elf-readelf
+ADDR2LINE = $(MSPGCC_BIN_DIR)/msp430-elf-addr2line
+
 
 #Files
 TARGET = $(BUILD_DIR)/bin/$(TARGET_HW)/$(TARGET_NAME)
@@ -58,12 +60,14 @@ TARGET = $(BUILD_DIR)/bin/$(TARGET_HW)/$(TARGET_NAME)
 SOURCES_WITH_HEADERS = \
 					   src/common/assert_handler.c \
 					   src/common/ring_buffer.c \
+					   src/common/trace.c \
 					   src/app/drive.c \
 					   src/drivers/led.c \
 					   src/app/enemy.c \
 					   src/drivers/io.c \
 					   src/drivers/mcu_init.c \
 					   src/drivers/uart.c \
+					   external/printf/printf.c \
 
 
 #SOURCES_WITH_HEADERS = \
@@ -108,11 +112,17 @@ TEST_DEFINE = $(addprefix -DTEST=,$(TEST))
 DEFINES = \
 		  $(HW_DEFINE) \
 		  $(TEST_DEFINE) \
+		  -DPRINTF_INCLUDE_CONFIG_H \
+
 
 #Static Analysis
 ##Don't check the msp430 helper headers (they have a lot of ifdefs)
-CPPCHECK_INCLUDES = ./src
-CPPCHECK_IGNORE = external/printf
+CPPCHECK_INCLUDES = ./src ./
+IGNORE_FILES_FORMAT_CPPCHECK = \
+							   external/printf/printf.h \
+							   external/printf/printf.c
+SOURCES_FORMAT_CPPCHECK = $(filter-out $(IGNORE_FILES_FORMAT_CPPCHECK),$(SOURCES))
+HEADERS_FORMAT = $(filter-out $(IGNORE_FILES_FORMAT_CPPCHECK),$(HEADERS))
 CPPCHECK_FLAGS = \
 		 --quiet --enable=all --error-exitcode=1 \
 		 --inline-suppr \
@@ -121,7 +131,7 @@ CPPCHECK_FLAGS = \
 		 --suppress=unmatchedSuppression \
 		 --suppress=unusedFunction \
 		 $(addprefix -I,$(CPPCHECK_INCLUDES)) \
-		 $(ADDPREFIX -i,$(CPPCHECK_IGNORE))
+
 
 #Flags
 MCU = msp430f5529
@@ -145,7 +155,7 @@ $(OBJ_DIR)/%.o: %.c
 
 #Phonies
 
-.PHONY: all clean flash cppcheck format size symbols
+.PHONY: all clean flash cppcheck format size symbols addr2line
 
 all: $(TARGET)
 
@@ -156,9 +166,9 @@ flash: $(TARGET)
 	@$(DEBUG) tilib "prog $(TARGET)"
 
 cppcheck:
-	@$(CPPCHECK) $(CPPCHECK_FLAGS) $(SOURCES)
+	@$(CPPCHECK) $(CPPCHECK_FLAGS) $(SOURCES_FORMAT_CPPCHECK)
 format:
-	@$(FORMAT) -i $(SOURCES) $(HEADERS)
+	@$(FORMAT) -i $(SOURCES_FORMAT_CPPCHECK) $(HEADERS_FORMAT)
 
 size: $(TARGET)
 	@$(SIZE) $(TARGET)
@@ -167,3 +177,5 @@ symbols: $(TARGET)
 	#List symbols table sorted by size
 	@$(READELF) -s $(TARGET) | sort -n -k3
 
+addr2line: $(TARGET)
+	@$(ADDR2LINE) -e $(TARGET) $(ADDR)
