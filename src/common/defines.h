@@ -7,6 +7,8 @@
 
 #define INTERRUPT_FUNCTION(vector) void __attribute__((interrupt(vector)))
 
+#define IS_ODD(x) (x & 1)
+
 // Clock rate calculation when it is set to default 1MHZ
 #define CYCLES_1MHZ (1000000u)
 #define CYCLES_16MHZ (16u * CYCLES_1MHZ)

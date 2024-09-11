@@ -100,6 +100,11 @@ static const struct io_config
         [IO_UART_TXD] = {IO_SELECT_ALT1, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
                          IO_OUT_LOW},
 
+        /* Input (no resitor required according to data sheet of IR receiver)
+         */
+        [IO_IR_REMOTE] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_INPUT,
+                          IO_OUT_LOW},
+
 #if defined(LAUNCHPAD)
         // Unused pins
         [IO_UNUSED_1] = UNUSED_CONFIG,
@@ -108,12 +113,14 @@ static const struct io_config
         [IO_UNUSED_4] = UNUSED_CONFIG,
         [IO_UNUSED_5] = UNUSED_CONFIG,
         [IO_UNUSED_6] = UNUSED_CONFIG,
-        [IO_UNUSED_7] = UNUSED_CONFIG,
         [IO_UNUSED_8] = UNUSED_CONFIG,
         [IO_UNUSED_9] = UNUSED_CONFIG,
         [IO_UNUSED_10] = UNUSED_CONFIG,
         [IO_UNUSED_11] = UNUSED_CONFIG,
         [IO_UNUSED_12] = UNUSED_CONFIG,
+        [IO_UNUSED_13] = UNUSED_CONFIG,
+        [IO_UNUSED_14] = UNUSED_CONFIG,
+
 #endif
 };
 
@@ -239,11 +246,11 @@ static void io_set_interrupt_trigger(io_e io, io_trigger_e trigger) {
 
   switch (trigger) {
   case IO_TRIGGER_RISING:
-    *port_interrupt_edge_select_register[port] &= ~pin;
+    *port_interrupt_edge_select_register[port] |= pin;
     break;
 
   case IO_TRIGGER_FALLING:
-    *port_interrupt_edge_select_register[port] |= pin;
+    *port_interrupt_edge_select_register[port] &= ~pin;
     break;
   }
   /* Also clear the interrupt here, because even if interrupt
