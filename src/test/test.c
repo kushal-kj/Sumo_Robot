@@ -4,6 +4,7 @@
 #include "drivers/led.h"
 #include "drivers/mcu_init.h"
 #include "drivers/uart.h"
+#include "drivers/ir_remote.h"
 #include <msp430.h>
 //#include "external/printf/printf.h"
 #include "common/trace.h"
@@ -204,6 +205,20 @@ static void test_trace(void)
 		BUSY_WAIT_ms(100);
 	}
 }
+
+SUPPRESS_UNUSED
+static void test_ir_remote(void)
+{
+	test_setup();
+	trace_init();
+	ir_remote_init();
+	while(1)
+	{
+		TRACE("Command %s", ir_remote_cmd_to_string(ir_remote_get_cmd()));
+		BUSY_WAIT_ms(250);
+	}
+}
+
 
 int main()
 {

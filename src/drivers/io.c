@@ -100,13 +100,17 @@ static const struct io_config
         [IO_UART_TXD] = {IO_SELECT_ALT1, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
                          IO_OUT_LOW},
 
+        /* Input (no resitor required according to data sheet of IR receiver)
+         */
+        [IO_IR_REMOTE] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_INPUT,
+                          IO_OUT_LOW},
+
 #if defined(LAUNCHPAD)
         // Unused pins
         [IO_UNUSED_1] = UNUSED_CONFIG,
         [IO_UNUSED_2] = UNUSED_CONFIG,
         [IO_UNUSED_3] = UNUSED_CONFIG,
         [IO_UNUSED_4] = UNUSED_CONFIG,
-        [IO_UNUSED_5] = UNUSED_CONFIG,
         [IO_UNUSED_6] = UNUSED_CONFIG,
         [IO_UNUSED_7] = UNUSED_CONFIG,
         [IO_UNUSED_8] = UNUSED_CONFIG,
