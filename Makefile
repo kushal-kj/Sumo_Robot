@@ -67,6 +67,7 @@ SOURCES_WITH_HEADERS = \
 					   src/drivers/io.c \
 					   src/drivers/mcu_init.c \
 					   src/drivers/uart.c \
+					   src/drivers/ir_remote.c \
 					   external/printf/printf.c \
 
 
