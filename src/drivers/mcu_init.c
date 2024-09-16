@@ -68,6 +68,7 @@ static void init_clocks() {
 
   // Additional stabilization check to ensure DCO is running at 16 MHz
   // The ASSERT macro checks if the DCO settings are correct:
+
   // UCSCTL1 should equal DCORSEL_4, and UCSCTL2 should equal 488.
   // If either condition is false, the ASSERT will trigger an error.
   ASSERT((UCSCTL1 == DCORSEL_4) && ((UCSCTL2 & 0x03FF) == 488));

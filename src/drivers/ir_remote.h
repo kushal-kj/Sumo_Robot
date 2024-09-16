@@ -11,6 +11,7 @@
 // A driver that decodes the commands sent to the IR receiver (NEC protocol)
 
 typedef enum {
+
   IR_CMD_0 = 0x98,
   IR_CMD_1 = 0xA2,
   IR_CMD_2 = 0x62,
@@ -29,7 +30,6 @@ typedef enum {
   IR_CMD_RIGHT = 0x5A,
   IR_CMD_OK = 0x38,
   IR_CMD_NONE = 0xFF
-
 } ir_cmd_e;
 
 void ir_remote_init(void);

@@ -131,6 +131,7 @@ void __attribute__((interrupt(PORT2_VECTOR))) isr_port2(void)
 */
 
 INTERRUPT_FUNCTION(TIMER1_A0_VECTOR) isr_timer_a0(void) {
+
   // Ensure the timer hasn't exceeded the timeout
   ASSERT(timer_ms <= TIMER_TIMEOUT_ms);
 

@@ -120,7 +120,6 @@ static const struct io_config
         [IO_UNUSED_12] = UNUSED_CONFIG,
         [IO_UNUSED_13] = UNUSED_CONFIG,
         [IO_UNUSED_14] = UNUSED_CONFIG,
-
 #endif
 };
 
@@ -246,11 +245,11 @@ static void io_set_interrupt_trigger(io_e io, io_trigger_e trigger) {
 
   switch (trigger) {
   case IO_TRIGGER_RISING:
-    *port_interrupt_edge_select_register[port] |= pin;
+    *port_interrupt_edge_select_register[port] &= ~pin;
     break;
 
   case IO_TRIGGER_FALLING:
-    *port_interrupt_edge_select_register[port] &= ~pin;
+    *port_interrupt_edge_select_register[port] |= pin;
     break;
   }
   /* Also clear the interrupt here, because even if interrupt
