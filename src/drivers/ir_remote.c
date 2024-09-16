@@ -14,8 +14,8 @@
 #define TIMER_INTERRUPT_TICKS (TICKS_PER_ms * TIMER_INTERRUPT_ms)
 static_assert(TIMER_INTERRUPT_TICKS <= 0xFFFF, "Ticks too large");
 
-#define TIMER_TIMEOUT_ms                                                       \
-  (150u) // the max time between 2 pulse is 100us so 150 is for safety
+// the max time between 2 pulse is 100us so 150 is for safety
+#define TIMER_TIMEOUT_ms (150u)
 
 #define IR_CMD_BUFFER_ELEM_CNT (10u)
 static uint8_t buffer[IR_CMD_BUFFER_ELEM_CNT];
