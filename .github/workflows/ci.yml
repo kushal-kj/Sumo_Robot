@@ -3,9 +3,21 @@ jobs:
   build_and_static_analysis:
     runs-on: ubuntu-latest
     container:
-      image:kushalkj/msp430-gcc-9.3.1.11:latest
+      image: kushalkj/msp430-gcc-9.3.1.11:latest
     steps:
-      -name: Checkout the repository
-       uses: actions/checkout@v3
-       -run: make
-       -run: make cppcheck
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+        with:
+          submodules: "true"
+      
+      - name: Formatting the code
+        run: make format && git diff --quiet
+
+      - name: Run cppcheck
+        run: make cppcheck
+      
+      - name: Set TOOLS_PATH and run make
+        run: TOOLS_PATH=/home/ubuntu/dev/tools make HW=LAUNCHPAD
+
+      - name: Set TOOLS_PATH for running TEST functions through bash scripts
+        run: TOOLS_PATH=/home/ubuntu/dev/tools tools/build_tests.sh
