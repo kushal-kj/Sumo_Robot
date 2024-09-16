@@ -1,4 +1,5 @@
 #include "drivers/ir_remote.h"
+#include "common/assert_handler.h"
 #include "common/defines.h"
 #include "common/ring_buffer.h"
 #include "drivers/io.h"
@@ -8,7 +9,7 @@
 
 #define TIMER_DIVIDER_ID_3 (8u)
 #define TIMER_MC_MASK (0x0030)
-#define TICKS_PER_ms (CYCLES_16MHZ / TIMER_DIVIDER_ID_3 / 1000u)
+#define TICKS_PER_ms (16000000u / TIMER_DIVIDER_ID_3 / 1000u)
 #define TIMER_INTERRUPT_ms (1u)
 #define TIMER_INTERRUPT_TICKS (TICKS_PER_ms * TIMER_INTERRUPT_ms)
 static_assert(TIMER_INTERRUPT_TICKS <= 0xFFFF, "Ticks too large");
@@ -39,9 +40,16 @@ static void timer_init(void) {
    * TASSEL_2: SMCLK
    * ID_3: Input divider 8
    */
+
+  // Ensure the timer interrupt ticks are within val8id range
+  ASSERT(TIMER_INTERRUPT_TICKS <= 0xFFFF);
+
   TA1CTL = TASSEL_2 + ID_3;
   TA1CCR0 = TIMER_INTERRUPT_TICKS;
   TA1CCTL0 = CCIE;
+
+  // Assert that the timer control register is set correctly
+  ASSERT((TA1CTL & TASSEL_2) && (TA1CTL & ID_3));
 }
 
 static void timer_start(void) {
@@ -89,6 +97,8 @@ static void isr_pulse(void) {
   timer_stop();
   pulse_count++;
 
+  ASSERT(pulse_count > 0);
+
   if (!is_valid_pulse(pulse_count, timer_ms)) {
     pulse_count = 1; // Assume start of new message
     ir_message.raw = 0;
@@ -98,6 +108,10 @@ static void isr_pulse(void) {
     ir_message.raw <<= 1;
     ir_message.raw += (timer_ms >= 2) ? 1 : 0;
   }
+
+  // Assert that the message pulse is valid before writing to the buffer
+  // ASSERT(is_message_pulse(pulse_count));
+
   if (is_message_pulse(pulse_count)) {
     ring_buffer_put(&ir_cmd_buffer, ir_message.decoded.cmd);
   }
@@ -117,6 +131,10 @@ void __attribute__((interrupt(PORT2_VECTOR))) isr_port2(void)
 */
 
 INTERRUPT_FUNCTION(TIMER1_A0_VECTOR) isr_timer_a0(void) {
+
+  // Ensure the timer hasn't exceeded the timeout
+  ASSERT(timer_ms <= TIMER_TIMEOUT_ms);
+
   if (timer_ms < TIMER_TIMEOUT_ms) {
     timer_ms++;
   } else {

@@ -111,13 +111,15 @@ static const struct io_config
         [IO_UNUSED_2] = UNUSED_CONFIG,
         [IO_UNUSED_3] = UNUSED_CONFIG,
         [IO_UNUSED_4] = UNUSED_CONFIG,
+        [IO_UNUSED_5] = UNUSED_CONFIG,
         [IO_UNUSED_6] = UNUSED_CONFIG,
-        [IO_UNUSED_7] = UNUSED_CONFIG,
         [IO_UNUSED_8] = UNUSED_CONFIG,
         [IO_UNUSED_9] = UNUSED_CONFIG,
         [IO_UNUSED_10] = UNUSED_CONFIG,
         [IO_UNUSED_11] = UNUSED_CONFIG,
         [IO_UNUSED_12] = UNUSED_CONFIG,
+        [IO_UNUSED_13] = UNUSED_CONFIG,
+        [IO_UNUSED_14] = UNUSED_CONFIG,
 #endif
 };
 
