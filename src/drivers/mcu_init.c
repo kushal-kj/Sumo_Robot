@@ -72,6 +72,10 @@ static void init_clocks() {
   // UCSCTL1 should equal DCORSEL_4, and UCSCTL2 should equal 488.
   // If either condition is false, the ASSERT will trigger an error.
   ASSERT((UCSCTL1 == DCORSEL_4) && ((UCSCTL2 & 0x03FF) == 488));
+
+  // Additional check to confirm SMCLK is running at the expected 16MHz
+
+  ASSERT(UCSCTL5 == 0);
 }
 
 /* Watchdog is enabled by default and will reset the microcontroller
