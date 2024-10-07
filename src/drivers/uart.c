@@ -23,7 +23,6 @@ static struct ring_buffer tx_buffer = {.buffer = buffer,
  * msp430x5xx family user guide.
  */
 
-#define SMCLK (16000000u)
 #define BRCLK (SMCLK)
 #define UART_BAUD_RATE (115200u)
 

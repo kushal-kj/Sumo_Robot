@@ -5,6 +5,7 @@
 #include "drivers/mcu_init.h"
 #include "drivers/uart.h"
 #include "drivers/ir_remote.h"
+#include "drivers/pwm.h"
 #include <msp430.h>
 //#include "external/printf/printf.h"
 #include "common/trace.h"
@@ -219,6 +220,25 @@ static void test_ir_remote(void)
 	}
 }
 
+SUPPRESS_UNUSED
+static void test_pwm(void)
+{
+	test_setup();
+	trace_init();
+	pwm_init();
+	const uint8_t duty_cycles[] = {100, 75, 50, 25, 1, 0};
+	const uint16_t wait_time = 2000;
+	while(1)
+	{
+		for(uint8_t i=0; i< ARRAY_SIZE(duty_cycles); i++)
+		{
+			TRACE("Set duty cycle to %d for %d ms", duty_cycles[i], wait_time);
+			pwm_set_duty_cycle(PWM_L298N_LEFT, duty_cycles[i]);
+			pwm_set_duty_cycle(PWM_L298N_RIGHT, duty_cycles[i]);
+			BUSY_WAIT_ms(2000);
+		}
+	}
+}
 
 int main()
 {
