@@ -9,7 +9,7 @@
 
 #if defined(LAUNCHPAD)
 
-#define IO_PORT_CNT (3u)
+#define IO_PORT_CNT (4u)
 #endif
 
 #define IO_PIN_CNT_PER_PORT (8u)
@@ -105,21 +105,37 @@ static const struct io_config
         [IO_IR_REMOTE] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_INPUT,
                           IO_OUT_LOW},
 
+        // Output drivern by Timer A0, direction must be set to output
+        [IO_PWM_MOTORS_LEFT] = {IO_SELECT_ALT1, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
+                                IO_OUT_LOW},
+
+        // Output driven by Timer A0, direction must be set to output
+        //[IO_PWM_MOTORS_RIGHT] = {IO_SELECT_ALT1, IO_PUPD_DISABLED,
+        // IO_DIR_OUTPUT, IO_OUT_LOW},
+
+        // Output
+        [IO_MOTORS_LEFT_CC_1] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
+                                 IO_DIR_OUTPUT, IO_OUT_LOW},
+        [IO_MOTORS_LEFT_CC_2] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
+                                 IO_DIR_OUTPUT, IO_OUT_LOW},
+/*
+[IO_MOTORS_RIGHT_CC_1] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
+IO_OUT_LOW}, [IO_MOTORS_RIGHT_CC_2] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
+IO_DIR_OUTPUT, IO_OUT_LOW},
+*/
+
 #if defined(LAUNCHPAD)
         // Unused pins
         [IO_UNUSED_1] = UNUSED_CONFIG,
         [IO_UNUSED_2] = UNUSED_CONFIG,
         [IO_UNUSED_3] = UNUSED_CONFIG,
-        [IO_UNUSED_4] = UNUSED_CONFIG,
-        [IO_UNUSED_5] = UNUSED_CONFIG,
-        [IO_UNUSED_6] = UNUSED_CONFIG,
+        [IO_UNUSED_7] = UNUSED_CONFIG,
         [IO_UNUSED_8] = UNUSED_CONFIG,
         [IO_UNUSED_9] = UNUSED_CONFIG,
-        [IO_UNUSED_10] = UNUSED_CONFIG,
         [IO_UNUSED_11] = UNUSED_CONFIG,
         [IO_UNUSED_12] = UNUSED_CONFIG,
         [IO_UNUSED_13] = UNUSED_CONFIG,
-        [IO_UNUSED_14] = UNUSED_CONFIG,
+
 #endif
 };
 
@@ -140,11 +156,13 @@ void io_configure(io_e io, const struct io_config *config) {
 void io_get_current_config(io_e io, struct io_config *current_config) {
   const uint8_t port = io_port(io);
   const uint8_t pin = io_pin_bit(io);
-  const uint8_t sel1 = *port_sel1_regs[port] & pin;
+  const uint8_t sel1 = (*port_sel1_regs[port] & pin) ? 1 : 0;
   current_config->select = (io_select_e)(sel1);
-  current_config->pupd_resistor = (io_pupd_e)(*port_ren_regs[port] & pin);
-  current_config->dir = (io_dir_e)(*port_dir_regs[port] & pin);
-  current_config->out = (io_out_e)(*port_out_regs[port] & pin);
+  current_config->pupd_resistor =
+      (*port_ren_regs[port] & pin) ? IO_PUPD_ENABLED : IO_PUPD_DISABLED;
+  current_config->dir =
+      (*port_dir_regs[port] & pin) ? IO_DIR_OUTPUT : IO_DIR_INPUT;
+  current_config->out = (*port_out_regs[port] & pin) ? IO_OUT_HIGH : IO_OUT_LOW;
 }
 
 bool io_config_compare(const struct io_config *cfg1,
