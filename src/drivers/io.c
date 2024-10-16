@@ -9,7 +9,7 @@
 
 #if defined(LAUNCHPAD)
 
-#define IO_PORT_CNT (3u)
+#define IO_PORT_CNT (4u)
 #endif
 
 #define IO_PIN_CNT_PER_PORT (8u)
@@ -109,22 +109,33 @@ static const struct io_config
         [IO_PWM_MOTORS_LEFT] = {IO_SELECT_ALT1, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
                                 IO_OUT_LOW},
 
-        [IO_PWM_MOTORS_RIGHT] = {IO_SELECT_ALT1, IO_PUPD_DISABLED,
+        // Output driven by Timer A0, direction must be set to output
+        //[IO_PWM_MOTORS_RIGHT] = {IO_SELECT_ALT1, IO_PUPD_DISABLED,
+        // IO_DIR_OUTPUT, IO_OUT_LOW},
+
+        // Output
+        [IO_MOTORS_LEFT_CC_1] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
                                  IO_DIR_OUTPUT, IO_OUT_LOW},
+        [IO_MOTORS_LEFT_CC_2] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
+                                 IO_DIR_OUTPUT, IO_OUT_LOW},
+/*
+[IO_MOTORS_RIGHT_CC_1] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
+IO_OUT_LOW}, [IO_MOTORS_RIGHT_CC_2] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
+IO_DIR_OUTPUT, IO_OUT_LOW},
+*/
 
 #if defined(LAUNCHPAD)
         // Unused pins
         [IO_UNUSED_1] = UNUSED_CONFIG,
         [IO_UNUSED_2] = UNUSED_CONFIG,
         [IO_UNUSED_3] = UNUSED_CONFIG,
-        [IO_UNUSED_6] = UNUSED_CONFIG,
+        [IO_UNUSED_7] = UNUSED_CONFIG,
         [IO_UNUSED_8] = UNUSED_CONFIG,
         [IO_UNUSED_9] = UNUSED_CONFIG,
-        [IO_UNUSED_10] = UNUSED_CONFIG,
         [IO_UNUSED_11] = UNUSED_CONFIG,
         [IO_UNUSED_12] = UNUSED_CONFIG,
         [IO_UNUSED_13] = UNUSED_CONFIG,
-        [IO_UNUSED_14] = UNUSED_CONFIG,
+
 #endif
 };
 

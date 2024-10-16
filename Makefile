@@ -69,6 +69,7 @@ SOURCES_WITH_HEADERS = \
 					   src/drivers/uart.c \
 					   src/drivers/ir_remote.c \
 					   src/drivers/pwm.c \
+					   src/drivers/l298n_motordriver.c \
 					   external/printf/printf.c \
 
 

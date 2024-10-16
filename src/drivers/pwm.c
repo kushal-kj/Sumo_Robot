@@ -112,10 +112,10 @@ void pwm_init(void) {
   struct io_config current_config;
   io_get_current_config(IO_PWM_MOTORS_LEFT, &current_config);
   ASSERT(io_config_compare(&current_config, &pwm_io_config));
-
-  io_get_current_config(IO_PWM_MOTORS_RIGHT, &current_config);
-  ASSERT(io_config_compare(&current_config, &pwm_io_config));
-
+  /*
+    io_get_current_config(IO_PWM_MOTORS_RIGHT, &current_config);
+    ASSERT(io_config_compare(&current_config, &pwm_io_config));
+  */
   /* TASSEL_2 : Clock source SMCLK
    * ID_3 : Input divider /8
    * MC_0 : Stopped

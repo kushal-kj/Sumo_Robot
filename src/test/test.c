@@ -6,6 +6,7 @@
 #include "drivers/uart.h"
 #include "drivers/ir_remote.h"
 #include "drivers/pwm.h"
+#include "drivers/l298n_motordriver.h"
 #include <msp430.h>
 //#include "external/printf/printf.h"
 #include "common/trace.h"
@@ -227,7 +228,7 @@ static void test_pwm(void)
 	trace_init();
 	pwm_init();
 	const uint8_t duty_cycles[] = {100, 75, 50, 25, 1, 0};
-	const uint16_t wait_time = 2000;
+	const uint16_t wait_time = 3000;
 	while(1)
 	{
 		for(uint8_t i=0; i< ARRAY_SIZE(duty_cycles); i++)
@@ -235,7 +236,40 @@ static void test_pwm(void)
 			TRACE("Set duty cycle to %d for %d ms", duty_cycles[i], wait_time);
 			pwm_set_duty_cycle(PWM_L298N_LEFT, duty_cycles[i]);
 			pwm_set_duty_cycle(PWM_L298N_RIGHT, duty_cycles[i]);
-			BUSY_WAIT_ms(2000);
+			BUSY_WAIT_ms(3000);
+		}
+	}
+}
+
+SUPPRESS_UNUSED
+static void test_l298n(void)
+{
+	test_setup();
+	trace_init();
+	l298n_init();
+
+	const l298n_mode_e modes[] = 
+	{
+		L298N_MODE_FORWARD,
+		L298N_MODE_REVERSE,
+		L298N_MODE_FORWARD,
+		L298N_MODE_REVERSE,
+	};
+
+	const uint8_t duty_cycles[] = {100, 50, 25, 0};
+	while(1)
+	{
+		for(uint8_t i=0; i<ARRAY_SIZE(duty_cycles); i++)
+		{
+			TRACE("Set mode %d and duty cycle %d", modes[i], duty_cycles[i]);
+			l298n_set_mode(L298N_LEFT, modes[i]);
+			l298n_set_mode(L298N_RIGHT, modes[i]);
+			l298n_set_pwm(L298N_LEFT, duty_cycles[i]);
+			l298n_set_pwm(L298N_RIGHT, duty_cycles[i]);
+			BUSY_WAIT_ms(3000);
+			l298n_set_mode(L298N_LEFT, L298N_MODE_STOP);
+			l298n_set_mode(L298N_RIGHT, L298N_MODE_STOP);
+			BUSY_WAIT_ms(1000);
 		}
 	}
 }
