@@ -5,6 +5,9 @@
 #include "drivers/mcu_init.h"
 #include "drivers/uart.h"
 #include "drivers/ir_remote.h"
+#include "drivers/pwm.h"
+#include "drivers/l298n_motordriver.h"
+#include "app/drive.h"
 #include <msp430.h>
 //#include "external/printf/printf.h"
 #include "common/trace.h"
@@ -217,6 +220,126 @@ static void test_ir_remote(void)
 		TRACE("Command %s", ir_remote_cmd_to_string(ir_remote_get_cmd()));
 		BUSY_WAIT_ms(250);
 	}
+}
+
+SUPPRESS_UNUSED
+static void test_pwm(void)
+{
+	test_setup();
+	trace_init();
+	pwm_init();
+	const uint8_t duty_cycles[] = {100, 75, 50, 25, 1, 0};
+	const uint16_t wait_time = 3000;
+	while(1)
+	{
+		for(uint8_t i=0; i< ARRAY_SIZE(duty_cycles); i++)
+		{
+			TRACE("Set duty cycle to %d for %d ms", duty_cycles[i], wait_time);
+			pwm_set_duty_cycle(PWM_L298N_LEFT, duty_cycles[i]);
+			pwm_set_duty_cycle(PWM_L298N_RIGHT, duty_cycles[i]);
+			BUSY_WAIT_ms(3000);
+		}
+	}
+}
+
+SUPPRESS_UNUSED
+static void test_l298n(void)
+{
+	test_setup();
+	trace_init();
+	l298n_init();
+
+	const l298n_mode_e modes[] = 
+	{
+		L298N_MODE_FORWARD,
+		L298N_MODE_REVERSE,
+		L298N_MODE_FORWARD,
+		L298N_MODE_REVERSE,
+	};
+
+	const uint8_t duty_cycles[] = {100, 50, 25, 0};
+	while(1)
+	{
+		for(uint8_t i=0; i<ARRAY_SIZE(duty_cycles); i++)
+		{
+			TRACE("Set mode %d and duty cycle %d", modes[i], duty_cycles[i]);
+			l298n_set_mode(L298N_LEFT, modes[i]);
+			l298n_set_mode(L298N_RIGHT, modes[i]);
+			l298n_set_pwm(L298N_LEFT, duty_cycles[i]);
+			l298n_set_pwm(L298N_RIGHT, duty_cycles[i]);
+			BUSY_WAIT_ms(3000);
+			l298n_set_mode(L298N_LEFT, L298N_MODE_STOP);
+			l298n_set_mode(L298N_RIGHT, L298N_MODE_STOP);
+			BUSY_WAIT_ms(1000);
+		}
+	}
+}
+
+SUPPRESS_UNUSED
+static void test_drive(void)
+{
+	test_setup();
+	trace_init();
+	drive_init();
+	ir_remote_init();
+	drive_speed_e speed = DRIVE_SPEED_SLOW;
+	drive_dir_e dir = DRIVE_DIR_FORWARD;
+	while(1){
+		BUSY_WAIT_ms(100);
+		ir_cmd_e cmd = ir_remote_get_cmd();
+		switch(cmd)
+		{
+			case IR_CMD_0:
+				drive_stop();
+				continue;
+			case IR_CMD_1:
+				speed = DRIVE_SPEED_SLOW;
+				break;
+			case IR_CMD_2:
+				speed = DRIVE_SPEED_MEDIUM;
+				break;
+			case IR_CMD_3:
+				speed = DRIVE_SPEED_FAST;
+				break;
+			case IR_CMD_4:
+				speed = DRIVE_SPEED_MAX;
+				break;
+			case IR_CMD_UP:
+				dir = DRIVE_DIR_FORWARD;
+				break;
+			case IR_CMD_DOWN:
+				dir = DRIVE_DIR_REVERSE;
+				break;
+			case IR_CMD_LEFT:
+				dir = DRIVE_DIR_ROTATE_LEFT;
+				break;
+			case IR_CMD_RIGHT:
+				dir = DRIVE_DIR_ROTATE_RIGHT;
+				break;
+			case IR_CMD_5:
+			case IR_CMD_6:
+			case IR_CMD_7:
+			case IR_CMD_8:
+			case IR_CMD_9:
+			case IR_CMD_STAR:
+			case IR_CMD_HASH:
+			case IR_CMD_OK:
+			case IR_CMD_NONE:
+				continue;
+		}
+		drive_set(dir, speed);
+	}
+}
+
+SUPPRESS_UNUSED
+static void test_assert_motors(void)
+{
+	test_setup();
+	drive_init();
+	drive_set(DRIVE_DIR_FORWARD, DRIVE_SPEED_MAX);
+	BUSY_WAIT_ms(3000);
+	ASSERT(0);
+	while(0){}
 }
 
 

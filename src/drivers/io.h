@@ -38,6 +38,14 @@ typedef enum {
   IO_35,
   IO_36,
   IO_37,
+  IO_40,
+  IO_41,
+  IO_42,
+  IO_43,
+  IO_44,
+  IO_45,
+  IO_46,
+  IO_47,
 
 } io_generic_e;
 
@@ -49,20 +57,23 @@ typedef enum {
   IO_TEST_LED = IO_10,
   IO_UNUSED_1 = IO_11,
   IO_UNUSED_2 = IO_12,
-  IO_UNUSED_3 = IO_14,
-  IO_UNUSED_4 = IO_15,
-  IO_UNUSED_5 = IO_16,
-  IO_UNUSED_6 = IO_17,
+  IO_UNUSED_3 = IO_13,
+  IO_PWM_MOTORS_LEFT = IO_14,
+  IO_PWM_MOTORS_RIGHT = IO_15,
+  IO_MOTORS_RIGHT_CC_1 = IO_16,
+  IO_UNUSED_7 = IO_17,
   IO_IR_REMOTE = IO_20,
   IO_UNUSED_8 = IO_21,
   IO_UNUSED_9 = IO_22,
-  IO_UNUSED_10 = IO_23,
+  IO_MOTORS_LEFT_CC_2 = IO_23,
   IO_UNUSED_11 = IO_24,
   IO_UNUSED_12 = IO_25,
   IO_UNUSED_13 = IO_26,
-  IO_UNUSED_14 = IO_27,
+  IO_MOTORS_RIGHT_CC_2 = IO_27,
   IO_UART_RXD = IO_34,
   IO_UART_TXD = IO_33,
+  IO_MOTORS_LEFT_CC_1 = IO_37,
+
 #endif
 } io_e;
 

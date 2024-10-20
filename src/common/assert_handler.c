@@ -16,6 +16,14 @@
  */
 #define ASSERT_STRING_MAX_SIZE (15u + 6u + 1U)
 
+#define GPIO_OUTPUT_LOW(port, bit)                                             \
+  do {                                                                         \
+    P##port##SEL &= ~(BIT##bit);                                               \
+    P##port##DIR |= BIT##bit;                                                  \
+    P##port##REN &= ~(BIT##bit);                                               \
+    P##port##OUT &= ~(BIT##bit);                                               \
+  } while (0)
+
 static void assert_trace(uint16_t program_counter) {
   // UART TX
   P3SEL |= BIT3;
@@ -34,9 +42,7 @@ static void assert_blink_led(void) {
   // Blink LED indefinetly when assertion is triggered.
 
   // Configure TEST_LED pin on launchpad
-  P1SEL &= ~(BIT0);
-  P1DIR |= (BIT0);
-  P1REN &= ~(BIT0);
+  GPIO_OUTPUT_LOW(1, 0);
 
   while (1) {
     // Blink LED on target in case the wrong target was flashed
@@ -45,12 +51,24 @@ static void assert_blink_led(void) {
   }
 }
 
+// Stop the motors when something unexpected happens (assert) to prevent damage
+static void assert_stop_motors(void) {
+  GPIO_OUTPUT_LOW(1, 4); // Left PWM
+  GPIO_OUTPUT_LOW(3, 7); // Left CC1
+  GPIO_OUTPUT_LOW(2, 3); // Left CC2
+  GPIO_OUTPUT_LOW(1, 6); // Right CC1
+  GPIO_OUTPUT_LOW(2, 7); // Right CC2
+  GPIO_OUTPUT_LOW(1, 5); // Right PWM
+}
+
 /*Minimize code dependency in this function to reduce the risk of accidently
  * calling a function with an assert in it, in which would cause the
  * assert_handler to be called recursively until statck overflow. */
 
 void assert_handler(uint16_t program_counter) {
+
   // Turn off motors ("safe state")
+  assert_stop_motors();
 
   // Breakpoint
   BREAKPOINT
