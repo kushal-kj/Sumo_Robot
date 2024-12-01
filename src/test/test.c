@@ -8,6 +8,7 @@
 #include "drivers/pwm.h"
 #include "drivers/l298n_motordriver.h"
 #include "drivers/adc.h"
+#include "drivers/qre1113.h"
 #include "app/drive.h"
 #include <msp430.h>
 //#include "external/printf/printf.h"
@@ -359,6 +360,22 @@ static void test_adc(void)
 			TRACE("ADC ch %u: %u ",i,values[i]);
 		}
 		BUSY_WAIT_ms(1000);
+	}
+}
+
+SUPPRESS_UNUSED
+static void test_qre1113(void)
+{
+	test_setup();
+	trace_init();
+	qre1113_init();
+	struct qre1113_voltages voltages = {0,0,0,0};
+
+	while(1)
+	{
+		qre1113_get_voltages(&voltages);
+		TRACE("Voltages f1 %u fr %u bl %u br %u", voltages.front_left, voltages.front_right, voltages.back_left,voltages.back_right);
+	BUSY_WAIT_ms(1000);
 	}
 }
 
