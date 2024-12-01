@@ -34,7 +34,6 @@ static_assert(sizeof(io_generic_e) == 1,
 static inline uint8_t
 io_port(io_e io) // They optimize better as inline functions instead of macros
 {
-  // return (io & IO_PORT_MASK) >> IO_PORT_OFFSET;
   return ((io & IO_PORT_MASK) >> IO_PORT_OFFSET);
 }
 
@@ -60,6 +59,7 @@ typedef enum {
  * access them through array indexing. */
 
 #if defined(LAUNCHPAD)
+
 static volatile uint8_t *const port_dir_regs[IO_PORT_CNT] = {
     &P1DIR, &P2DIR, &P3DIR, &P4DIR, &P5DIR, &P6DIR, &P7DIR, &P8DIR};
 static volatile uint8_t *const port_ren_regs[IO_PORT_CNT] = {
@@ -70,6 +70,7 @@ static volatile uint8_t *const port_in_regs[IO_PORT_CNT] = {
     &P1IN, &P2IN, &P3IN, &P4IN, &P5IN, &P6IN, &P7IN, &P8IN};
 static volatile uint8_t *const port_sel1_regs[IO_PORT_CNT] = {
     &P1SEL, &P2SEL, &P3SEL, &P4SEL, &P5SEL, &P6SEL, &P7SEL, &P8SEL};
+
 // static volatile uint8_t *const port_sel2_regs[IO_PORT_CNT] = {&P1SEL2,
 // &P2SEL2};
 #endif
@@ -92,6 +93,10 @@ static isr_function isr_functions[IO_INTERRUPT_PORT_CNT][IO_PIN_CNT_PER_PORT] =
 
 #define UNUSED_CONFIG                                                          \
   { IO_SELECT_GPIO, IO_PUPD_ENABLED, IO_DIR_OUTPUT, IO_OUT_LOW }
+
+// Overriden by ADC, so just default it to floating input here
+#define ADC_CONFIG                                                             \
+  { IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_INPUT, IO_OUT_LOW }
 
 // Overriden by ADC, so just default it to floating input here
 #define ADC_CONFIG                                                             \
@@ -133,6 +138,7 @@ static const struct io_config
                                  IO_DIR_OUTPUT, IO_OUT_LOW},
         [IO_MOTORS_LEFT_CC_2] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
                                  IO_DIR_OUTPUT, IO_OUT_LOW},
+
         /*
         [IO_MOTORS_RIGHT_CC_1] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
         IO_DIR_OUTPUT, IO_OUT_LOW}, [IO_MOTORS_RIGHT_CC_2] = {IO_SELECT_GPIO,
@@ -179,12 +185,14 @@ static const struct io_config
         [IO_UNUSED_32] = UNUSED_CONFIG,
         [IO_UNUSED_33] = UNUSED_CONFIG,
         [IO_UNUSED_34] = UNUSED_CONFIG,
+
         [IO_UNUSED_38] = UNUSED_CONFIG,
         [IO_UNUSED_39] = UNUSED_CONFIG,
         [IO_UNUSED_40] = UNUSED_CONFIG,
         [IO_UNUSED_41] = UNUSED_CONFIG,
         [IO_UNUSED_42] = UNUSED_CONFIG,
         [IO_UNUSED_43] = UNUSED_CONFIG,
+
         [IO_UNUSED_44] = UNUSED_CONFIG,
         [IO_UNUSED_45] = UNUSED_CONFIG,
         [IO_UNUSED_46] = UNUSED_CONFIG,
@@ -210,6 +218,7 @@ static const io_e io_adc_pins_arr[] = {
             IO_LINE_DETECT_FRONT_RIGHT,
             IO_LINE_DETECT_BACK_RIGHT
     #endif */
+
 };
 
 void io_init(void) {
@@ -343,12 +352,16 @@ uint8_t io_to_adc_idx(io_e io) {
     return 0;
   }
 }
-
 /*
 uint8_t io_to_adc_idx(io_e io)
 {
+<<<<<<< HEAD
         ASSERT(io_port(io) == IO_PORT6);
         return io_pin_idx(io);
+=======
+        ASSERT(io_port(io) == IO_PORT6);
+        return io_pin_idx(io);
+>>>>>>> 9fcddbe267c2beb72dc2f9b33f2a37c2a1e5722d
 }
 
 */
