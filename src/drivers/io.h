@@ -2,6 +2,7 @@
 #define IO_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /* IO pins handling including pinmapping,initialization, and configuration.
  * This wraps the more crude register defines provided in the headers from
@@ -46,6 +47,41 @@ typedef enum {
   IO_45,
   IO_46,
   IO_47,
+  IO_50,
+  IO_51,
+  IO_52,
+  IO_53,
+  IO_54,
+  IO_55,
+  IO_56,
+  IO_57,
+  IO_60,
+  IO_61,
+  IO_62,
+  IO_63,
+  IO_64,
+
+  IO_65,
+  IO_66,
+  IO_67,
+
+  IO_70,
+
+  IO_71,
+  IO_72,
+  IO_73,
+  IO_74,
+  IO_75,
+  IO_76,
+  IO_77,
+  IO_80,
+  IO_81,
+  IO_82,
+  IO_83,
+  IO_84,
+  IO_85,
+  IO_86,
+  IO_87,
 
 } io_generic_e;
 
@@ -70,9 +106,57 @@ typedef enum {
   IO_UNUSED_12 = IO_25,
   IO_UNUSED_13 = IO_26,
   IO_MOTORS_RIGHT_CC_2 = IO_27,
-  IO_UART_RXD = IO_34,
+  IO_UNUSED_14 = IO_30,
+  IO_UNUSED_15 = IO_31,
+  IO_UNUSED_16 = IO_32,
   IO_UART_TXD = IO_33,
+  IO_UART_RXD = IO_34,
+  IO_UNUSED_17 = IO_35,
+  IO_UNUSED_18 = IO_36,
   IO_MOTORS_LEFT_CC_1 = IO_37,
+  IO_UNUSED_19 = IO_40,
+  IO_UNUSED_20 = IO_41,
+  IO_UNUSED_21 = IO_42,
+  IO_UNUSED_22 = IO_43,
+  IO_UNUSED_23 = IO_44,
+  IO_UNUSED_24 = IO_45,
+  IO_UNUSED_25 = IO_46,
+  IO_UNUSED_26 = IO_47,
+  IO_UNUSED_27 = IO_50,
+  IO_UNUSED_28 = IO_51,
+  IO_UNUSED_29 = IO_52,
+  IO_UNUSED_30 = IO_53,
+  IO_UNUSED_31 = IO_54,
+  IO_UNUSED_32 = IO_55,
+  IO_UNUSED_33 = IO_56,
+  IO_UNUSED_34 = IO_57,
+  IO_LINE_DETECT_FRONT_LEFT = IO_60,
+  IO_LINE_DETECT_FRONT_RIGHT = IO_61,
+  IO_LINE_DETECT_BACK_RIGHT = IO_62,
+  IO_LINE_DETECT_BACK_LEFT = IO_63,
+  IO_UNUSED_38 = IO_64,
+
+  IO_UNUSED_39 = IO_65,
+  IO_UNUSED_40 = IO_66,
+  IO_UNUSED_41 = IO_67,
+
+  IO_UNUSED_42 = IO_70,
+
+  IO_UNUSED_43 = IO_71,
+  IO_UNUSED_44 = IO_72,
+  IO_UNUSED_45 = IO_73,
+  IO_UNUSED_46 = IO_74,
+  IO_UNUSED_47 = IO_75,
+  IO_UNUSED_48 = IO_76,
+  IO_UNUSED_49 = IO_77,
+  IO_UNUSED_50 = IO_80,
+  IO_UNUSED_51 = IO_81,
+  IO_UNUSED_52 = IO_82,
+  IO_UNUSED_53 = IO_83,
+  IO_UNUSED_54 = IO_84,
+  IO_UNUSED_55 = IO_85,
+  IO_UNUSED_56 = IO_86,
+  IO_UNUSED_57 = IO_87,
 
 #endif
 } io_e;
@@ -133,6 +217,8 @@ void io_set_direction(io_e io, io_dir_e direction);
 void io_set_pupd(io_e io, io_pupd_e pupd_resistor);
 void io_set_out(io_e io, io_out_e out);
 io_in_e io_get_input(io_e io); // the input register function returns a value
+const io_e *io_adc_pins(uint8_t *cnt);
+uint8_t io_to_adc_idx(io_e io);
 
 // INTERRUPTS
 typedef void (*isr_function)(void); // function pointer of type void

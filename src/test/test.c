@@ -7,6 +7,7 @@
 #include "drivers/ir_remote.h"
 #include "drivers/pwm.h"
 #include "drivers/l298n_motordriver.h"
+#include "drivers/adc.h"
 #include "app/drive.h"
 #include <msp430.h>
 //#include "external/printf/printf.h"
@@ -343,8 +344,27 @@ static void test_assert_motors(void)
 }
 
 
+SUPPRESS_UNUSED
+static void test_adc(void)
+{
+	test_setup();
+	trace_init();
+	adc_init();
+	while(1)
+	{
+		adc_channel_values_t values;
+		adc_get_channel_values(values);
+		for(uint8_t i=0;i<ADC_CHANNEL_COUNT;i++)
+		{
+			TRACE("ADC ch %u: %u ",i,values[i]);
+		}
+		BUSY_WAIT_ms(1000);
+	}
+}
+
 int main()
 {
 	TEST();
 	ASSERT(0);
 }
+

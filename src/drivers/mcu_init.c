@@ -22,7 +22,7 @@ static void init_clocks() {
   // Set DCO FLL reference to REFO (32.768 kHz crystal)
   // SELREF_2 selects REFOCLK as the FLL reference clock source.
   UCSCTL3 = SELREF_2;
-  UCSCTL4 |= SELA_2;
+  UCSCTL4 |= SELA_1;
 
   // Disable the FLL control loop before configuring the DCO.
   // SCG0 is a status register bit that controls the FLL.
