@@ -1,6 +1,7 @@
 #include "drivers/io.h"
 #include "common/assert_handler.h"
 #include "common/defines.h"
+//#include "external/printf/printf.h"
 
 #include <assert.h>
 #include <msp430.h>
@@ -9,12 +10,12 @@
 
 #if defined(LAUNCHPAD)
 
-#define IO_PORT_CNT (4u)
+#define IO_PORT_CNT (8u)
 #endif
 
 #define IO_PIN_CNT_PER_PORT (8u)
 
-#define IO_INTERRUPT_PORT_CNT (3u)
+#define IO_INTERRUPT_PORT_CNT (2u)
 
 /* To extract port and pin bit from enum io_generic_e (io_e).
  * With complier flag "-fshort-enums", the enums are represented
@@ -27,20 +28,31 @@ static_assert(sizeof(io_generic_e) == 1,
               "Unexpected size, -fshort-enums missing?");
 
 #define IO_PORT_OFFSET (3u)
-#define IO_PORT_MASK (0x3u << IO_PORT_OFFSET)
+#define IO_PORT_MASK (0x0Fu << IO_PORT_OFFSET)
 #define IO_PIN_MASK (0x7u)
 
 static inline uint8_t
 io_port(io_e io) // They optimize better as inline functions instead of macros
 {
-  return (io & IO_PORT_MASK) >> IO_PORT_OFFSET;
+  //return (io & IO_PORT_MASK) >> IO_PORT_OFFSET;
+  return ((io & IO_PORT_MASK) >> IO_PORT_OFFSET);
 }
 
 static inline uint8_t io_pin_idx(io_e io) { return io & IO_PIN_MASK; }
 
 static inline uint8_t io_pin_bit(io_e io) { return 1 << io_pin_idx(io); }
 
-typedef enum { IO_PORT1, IO_PORT2, IO_PORT3 } io_port_e;
+typedef enum 
+{ 
+	IO_PORT1, 
+	IO_PORT2, 
+	IO_PORT3, 
+	IO_PORT4, 
+	IO_PORT5, 
+	IO_PORT6, 
+	IO_PORT7,
+	IO_PORT8,
+} io_port_e;
 
 /* TI's helper header (msp430.h) provides defines/variables for accessing the
  * registers, and the address of these are resolved during linking. For cleaner
@@ -50,15 +62,15 @@ typedef enum { IO_PORT1, IO_PORT2, IO_PORT3 } io_port_e;
 
 #if defined(LAUNCHPAD)
 static volatile uint8_t *const port_dir_regs[IO_PORT_CNT] = {&P1DIR, &P2DIR,
-                                                             &P3DIR};
+                                                             &P3DIR, &P4DIR, &P5DIR, &P6DIR, &P7DIR, &P8DIR};
 static volatile uint8_t *const port_ren_regs[IO_PORT_CNT] = {&P1REN, &P2REN,
-                                                             &P3REN};
+                                                             &P3REN, &P4REN, &P5REN, &P6REN, &P7REN, &P8REN};
 static volatile uint8_t *const port_out_regs[IO_PORT_CNT] = {&P1OUT, &P2OUT,
-                                                             &P3OUT};
+                                                             &P3OUT, &P4OUT, &P5OUT, &P6OUT, &P7OUT, &P8OUT};
 static volatile uint8_t *const port_in_regs[IO_PORT_CNT] = {&P1IN, &P2IN,
-                                                            &P3IN};
+                                                            &P3IN, &P4IN, &P5IN, &P6IN, &P7IN, &P8IN};
 static volatile uint8_t *const port_sel1_regs[IO_PORT_CNT] = {&P1SEL, &P2SEL,
-                                                              &P3SEL};
+                                                              &P3SEL, &P4SEL, &P5SEL, &P6SEL, &P7SEL, &P8SEL};
 // static volatile uint8_t *const port_sel2_regs[IO_PORT_CNT] = {&P1SEL2,
 // &P2SEL2};
 #endif
@@ -79,8 +91,16 @@ static isr_function isr_functions[IO_INTERRUPT_PORT_CNT][IO_PIN_CNT_PER_PORT] =
         [IO_PORT2] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL},
 };
 
-#define UNUSED_CONFIG                                                          \
-  { IO_SELECT_GPIO, IO_PUPD_ENABLED, IO_DIR_OUTPUT, IO_OUT_LOW }
+#define UNUSED_CONFIG                                               \
+{\
+		IO_SELECT_GPIO, IO_PUPD_ENABLED, IO_DIR_OUTPUT, IO_OUT_LOW \
+}
+
+//Overriden by ADC, so just default it to floating input here
+#define ADC_CONFIG \
+{ \
+	IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_INPUT, IO_OUT_LOW \
+}
 
 /* This array holds the initial configuration of all IO pins/
  */
@@ -123,6 +143,13 @@ static const struct io_config
 IO_OUT_LOW}, [IO_MOTORS_RIGHT_CC_2] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
 IO_DIR_OUTPUT, IO_OUT_LOW},
 */
+		[IO_LINE_DETECT_FRONT_LEFT] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_INPUT, IO_OUT_LOW},
+		[IO_LINE_DETECT_FRONT_RIGHT] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_INPUT, IO_OUT_LOW},
+		[IO_LINE_DETECT_BACK_RIGHT] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_INPUT, IO_OUT_LOW},
+		[IO_LINE_DETECT_BACK_LEFT] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_INPUT, IO_OUT_LOW},
+
+
+
 
 #if defined(LAUNCHPAD)
         // Unused pins
@@ -135,8 +162,60 @@ IO_DIR_OUTPUT, IO_OUT_LOW},
         [IO_UNUSED_11] = UNUSED_CONFIG,
         [IO_UNUSED_12] = UNUSED_CONFIG,
         [IO_UNUSED_13] = UNUSED_CONFIG,
+        [IO_UNUSED_14] = UNUSED_CONFIG,
+        [IO_UNUSED_15] = UNUSED_CONFIG,
+        [IO_UNUSED_16] = UNUSED_CONFIG,
+        [IO_UNUSED_17] = UNUSED_CONFIG,
+        [IO_UNUSED_18] = UNUSED_CONFIG,
+        [IO_UNUSED_19] = UNUSED_CONFIG,
+        [IO_UNUSED_20] = UNUSED_CONFIG,
+        [IO_UNUSED_21] = UNUSED_CONFIG,
+        [IO_UNUSED_22] = UNUSED_CONFIG,
+        [IO_UNUSED_23] = UNUSED_CONFIG,
+        [IO_UNUSED_24] = UNUSED_CONFIG,
+        [IO_UNUSED_25] = UNUSED_CONFIG,
+        [IO_UNUSED_26] = UNUSED_CONFIG,
+        [IO_UNUSED_27] = UNUSED_CONFIG,
+        [IO_UNUSED_28] = UNUSED_CONFIG,
+        [IO_UNUSED_29] = UNUSED_CONFIG,
+        [IO_UNUSED_30] = UNUSED_CONFIG,
+        [IO_UNUSED_31] = UNUSED_CONFIG,
+        [IO_UNUSED_32] = UNUSED_CONFIG,
+        [IO_UNUSED_33] = UNUSED_CONFIG,
+        [IO_UNUSED_34] = UNUSED_CONFIG,
+        [IO_UNUSED_38] = UNUSED_CONFIG, 
+		[IO_UNUSED_39] = UNUSED_CONFIG,
+        [IO_UNUSED_40] = UNUSED_CONFIG,
+        [IO_UNUSED_41] = UNUSED_CONFIG,
+		[IO_UNUSED_42] = UNUSED_CONFIG,
+		[IO_UNUSED_43] = UNUSED_CONFIG,
+        [IO_UNUSED_44] = UNUSED_CONFIG,
+        [IO_UNUSED_45] = UNUSED_CONFIG,
+        [IO_UNUSED_46] = UNUSED_CONFIG,
+        [IO_UNUSED_47] = UNUSED_CONFIG,
+        [IO_UNUSED_48] = UNUSED_CONFIG,
+        [IO_UNUSED_49] = UNUSED_CONFIG,
+		[IO_UNUSED_50] = UNUSED_CONFIG,
+        [IO_UNUSED_51] = UNUSED_CONFIG,
+        [IO_UNUSED_52] = UNUSED_CONFIG,
+        [IO_UNUSED_53] = UNUSED_CONFIG,
+        [IO_UNUSED_54] = UNUSED_CONFIG,
+        [IO_UNUSED_55] = UNUSED_CONFIG,
+        [IO_UNUSED_56] = UNUSED_CONFIG,
+        [IO_UNUSED_57] = UNUSED_CONFIG,
+        
 
 #endif
+};
+
+static const io_e io_adc_pins_arr[] = 
+{
+	IO_LINE_DETECT_FRONT_LEFT,
+/*#if defined(NSUMO)
+	IO_LINE_DETECT_BACK_LEFT,
+	IO_LINE_DETECT_FRONT_RIGHT,
+	IO_LINE_DETECT_BACK_RIGHT
+#endif */
 };
 
 void io_init(void) {
@@ -252,6 +331,42 @@ io_in_e io_get_input(io_e io) {
 static void io_clear_interrupt(io_e io) {
   *port_interrupt_flag_regs[io_port(io)] &= ~io_pin_bit(io);
 }
+
+const io_e *io_adc_pins(uint8_t *cnt)
+{
+	*cnt = ARRAY_SIZE(io_adc_pins_arr);
+	return io_adc_pins_arr;
+}
+
+
+uint8_t io_to_adc_idx(io_e io)
+{
+	//Only pins on port 6 supports ADC
+	if(io_port(io) == IO_PORT6)
+	{
+		return io_pin_idx(io);	//A0 to A7 on PORT6
+	}
+	else if(io_port(io) == IO_PORT7)
+	{
+		return io_pin_idx(io)+8;
+	}
+	else
+	{
+		//printf("Invalid IO for ADC: %d\n",io);
+		ASSERT(0);	//Only PORT6 and PORT7 should be used for ADC
+		return 0;
+	}
+}
+
+/*
+uint8_t io_to_adc_idx(io_e io)
+{
+	ASSERT(io_port(io) == IO_PORT6);
+	return io_pin_idx(io);
+}
+
+*/
+
 
 /*This function also disables the interrupt because selecting the
  * edge might trigger one according to the datasheet */

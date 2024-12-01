@@ -62,6 +62,7 @@ SOURCES_WITH_HEADERS = \
 					   src/common/ring_buffer.c \
 					   src/common/trace.c \
 					   src/app/drive.c \
+					   src/app/enemy.c \
 					   src/drivers/led.c \
 					   src/app/enemy.c \
 					   src/drivers/io.c \
@@ -70,6 +71,7 @@ SOURCES_WITH_HEADERS = \
 					   src/drivers/ir_remote.c \
 					   src/drivers/pwm.c \
 					   src/drivers/l298n_motordriver.c \
+					   src/drivers/adc.c \
 					   external/printf/printf.c \
 
 
