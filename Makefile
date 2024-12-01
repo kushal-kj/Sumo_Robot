@@ -63,6 +63,7 @@ SOURCES_WITH_HEADERS = \
 					   src/common/trace.c \
 					   src/app/drive.c \
 					   src/app/enemy.c \
+					   src/app/line.c \
 					   src/drivers/led.c \
 					   src/app/enemy.c \
 					   src/drivers/io.c \
