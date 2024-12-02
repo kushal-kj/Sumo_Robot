@@ -13,6 +13,7 @@
 #include "drivers/vl53lox.h"
 #include "app/drive.h"
 #include "app/line.h"
+#include "app/enemy.h"
 #include <msp430.h>
 //#include "external/printf/printf.h"
 #include "common/trace.h"
@@ -489,6 +490,22 @@ void test_vl53l0x_multiple(void)
         BUSY_WAIT_ms(1000);
     }
 }
+
+
+SUPPRESS_UNUSED
+void test_enemy(void)
+{
+    test_setup();
+    trace_init();
+    enemy_init();
+    while (1) {
+        struct enemy enemy = enemy_get();
+        TRACE("%s %s", enemy_pos_str(enemy.position), enemy_range_str(enemy.range));
+        BUSY_WAIT_ms(1000);
+    }
+}
+
+
 
 int main()
 {
