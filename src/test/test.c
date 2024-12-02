@@ -9,8 +9,11 @@
 #include "drivers/l298n_motordriver.h"
 #include "drivers/adc.h"
 #include "drivers/qre1113.h"
+#include "drivers/i2c.h"
+#include "drivers/vl53lox.h"
 #include "app/drive.h"
 #include "app/line.h"
+#include "app/enemy.h"
 #include <msp430.h>
 //#include "external/printf/printf.h"
 #include "common/trace.h"
@@ -392,6 +395,117 @@ static void test_line(void)
 		BUSY_WAIT_ms(1000);
 	}
 }
+
+SUPPRESS_UNUSED
+static void test_i2c(void)
+{
+    test_setup();
+    trace_init();
+    i2c_init();
+    /* This test assumes there is a vl53l0x connected to i2c, pull its xshut pin high
+     * to get it out of standby and set target address to its default address (0x29) */
+    io_set_out(IO_XSHUT_FRONT, IO_OUT_HIGH);
+    i2c_set_slave_address(0x29);
+    // Wait for VL53L0X to leave standby
+    BUSY_WAIT_ms(100);
+    while(1) {
+        uint8_t vl53l0x_id = 0;
+        i2c_result_e result = i2c_read_addr8_data8(0xC0, &vl53l0x_id);
+        if (result) {
+            TRACE("I2C error result %d", result);
+        } else {
+            if (vl53l0x_id == 0xEE) {
+                TRACE("Read expected VL53L0X id (0xEE)");
+            } else {
+                TRACE("Read unexpected VL53l0X id 0x%X (expected 0xEE)", vl53l0x_id);
+            }
+        }
+        BUSY_WAIT_ms(1000);
+        const uint8_t write_value = 0xAB;
+        result = i2c_write_addr8_data8(0x01, write_value);
+        if (result)
+        {
+            TRACE("I2C error result %d", result);
+        }
+        uint8_t read_value = 0;
+        result = i2c_read_addr8_data8(0x01, &read_value);
+        if (read_value == write_value) {
+            TRACE("Written value 0x%X matches read value 0x%X", write_value, read_value);
+        } else {
+            TRACE("Written value 0x%X doesn't match read value 0x%X", write_value, read_value);
+        }
+        BUSY_WAIT_ms(1000);
+    }
+}
+
+
+SUPPRESS_UNUSED
+void test_vl53l0x(void)
+{
+    test_setup();
+    trace_init();
+    vl53l0x_result_e result = vl53l0x_init();
+    if (result) {
+        TRACE("vl53l0x_init failed");
+    }
+
+    while (1) {
+        uint16_t range = 0;
+        result = vl53l0x_read_range_single(VL53L0X_IDX_FRONT, &range);
+        if (result) {
+            TRACE("Range measure failed (result %u)", result);
+        } else {
+            if (range != VL53L0X_OUT_OF_RANGE) {
+                TRACE("Range %u mm", range);
+            } else {
+                TRACE("Out of range");
+            }
+        }
+        BUSY_WAIT_ms(1000);
+    }
+}
+
+SUPPRESS_UNUSED
+void test_vl53l0x_multiple(void)
+{
+    test_setup();
+    trace_init();
+    vl53l0x_result_e result = vl53l0x_init();
+    if (result) {
+        TRACE("vl53l0x_init failed");
+    }
+
+    while (1) {
+        vl53l0x_ranges_t ranges = { 0, 0, 0, 0, 0 };
+        bool fresh_values = false;
+        result = vl53l0x_read_range_multiple(ranges, &fresh_values);
+        if (result) {
+            TRACE("Range measure failed (result %u)", result);
+        }
+        TRACE("Range measure f %u fl %u fr %u l %u r %u", ranges[VL53L0X_IDX_FRONT],
+                                                          ranges[VL53L0X_IDX_FRONT_LEFT],
+                                                          ranges[VL53L0X_IDX_FRONT_RIGHT],
+                                                          ranges[VL53L0X_IDX_LEFT],
+                                                          ranges[VL53L0X_IDX_RIGHT]);
+        BUSY_WAIT_ms(1000);
+    }
+}
+
+
+SUPPRESS_UNUSED
+void test_enemy(void)
+{
+    test_setup();
+    trace_init();
+    enemy_init();
+    while (1) {
+        struct enemy enemy = enemy_get();
+        TRACE("%s %s", enemy_pos_str(enemy.position), enemy_range_str(enemy.range));
+        BUSY_WAIT_ms(1000);
+    }
+}
+
+
 
 int main()
 {
