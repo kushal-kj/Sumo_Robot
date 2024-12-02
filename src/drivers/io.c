@@ -162,6 +162,13 @@ static const struct io_config
         [IO_I2C_SDA] = {IO_SELECT_ALT1, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
                         IO_OUT_LOW},
 
+        /* Input
+         * Range sensor provides open-drain output and should be connected to an
+         * external pull-up, and there is one on the breakout board, so no
+         * internal pull-up needed. */
+        [IO_RANGE_SENSOR_FRONT_INT] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
+                                       IO_DIR_INPUT, IO_OUT_LOW},
+
 #if defined(LAUNCHPAD)
         // Unused pins
         [IO_UNUSED_1] = UNUSED_CONFIG,
@@ -178,7 +185,6 @@ static const struct io_config
         [IO_UNUSED_16] = UNUSED_CONFIG,
         [IO_UNUSED_17] = UNUSED_CONFIG,
         [IO_UNUSED_18] = UNUSED_CONFIG,
-        [IO_UNUSED_19] = UNUSED_CONFIG,
         [IO_UNUSED_23] = UNUSED_CONFIG,
         [IO_UNUSED_24] = UNUSED_CONFIG,
         [IO_UNUSED_25] = UNUSED_CONFIG,
@@ -382,11 +388,11 @@ static void io_set_interrupt_trigger(io_e io, io_trigger_e trigger) {
 
   switch (trigger) {
   case IO_TRIGGER_RISING:
-    *port_interrupt_edge_select_register[port] |= pin;
+    *port_interrupt_edge_select_register[port] &= ~pin;
     break;
 
   case IO_TRIGGER_FALLING:
-    *port_interrupt_edge_select_register[port] &= ~pin;
+    *port_interrupt_edge_select_register[port] |= pin;
     break;
   }
   /* Also clear the interrupt here, because even if interrupt
