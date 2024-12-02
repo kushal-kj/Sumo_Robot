@@ -74,6 +74,7 @@ SOURCES_WITH_HEADERS = \
 					   src/drivers/l298n_motordriver.c \
 					   src/drivers/adc.c \
 					   src/drivers/qre1113.c \
+					   src/drivers/i2c.c \
 					   external/printf/printf.c \
 
 

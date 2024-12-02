@@ -153,6 +153,15 @@ static const struct io_config
         [IO_LINE_DETECT_BACK_LEFT] = {IO_SELECT_GPIO, IO_PUPD_DISABLED,
                                       IO_DIR_INPUT, IO_OUT_LOW},
 
+        [IO_XSHUT_FRONT] = {IO_SELECT_GPIO, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
+                            IO_OUT_LOW},
+
+        [IO_I2C_SCL] = {IO_SELECT_ALT1, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
+                        IO_OUT_LOW},
+
+        [IO_I2C_SDA] = {IO_SELECT_ALT1, IO_PUPD_DISABLED, IO_DIR_OUTPUT,
+                        IO_OUT_LOW},
+
 #if defined(LAUNCHPAD)
         // Unused pins
         [IO_UNUSED_1] = UNUSED_CONFIG,
@@ -170,9 +179,6 @@ static const struct io_config
         [IO_UNUSED_17] = UNUSED_CONFIG,
         [IO_UNUSED_18] = UNUSED_CONFIG,
         [IO_UNUSED_19] = UNUSED_CONFIG,
-        [IO_UNUSED_20] = UNUSED_CONFIG,
-        [IO_UNUSED_21] = UNUSED_CONFIG,
-        [IO_UNUSED_22] = UNUSED_CONFIG,
         [IO_UNUSED_23] = UNUSED_CONFIG,
         [IO_UNUSED_24] = UNUSED_CONFIG,
         [IO_UNUSED_25] = UNUSED_CONFIG,
